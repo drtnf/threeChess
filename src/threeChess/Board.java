@@ -107,7 +107,6 @@ public class Board implements Cloneable{
       }
       current = next;
     }
-    System.out.println("");
     return current;
   } 
 

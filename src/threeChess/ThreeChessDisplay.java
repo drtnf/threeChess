@@ -145,25 +145,25 @@ public class ThreeChessDisplay extends JFrame{
       g.drawString(label,(29+i)*h_unit/2,(20-i)*v_unit/2);
     }
     for(int i = 0; i<4; i++){
-      g.setColor(Color.BLUE);
+      g.setColor(DARKBLUE);
       g.drawString(""+(i+1), (10-i)*h_unit/2, (4+i)*v_unit/2);
       g.drawString(""+(i+1), (30+i)*h_unit/2, (4+i)*v_unit/2);
-      g.setColor(Color.RED);
+      g.setColor(DARKRED);
       g.drawString(""+(i+1),(3+i)*h_unit/2, (11-i)*v_unit/2);
       g.drawString(""+(i+1),(13+2*i)*h_unit/2,21*v_unit/2);
-      g.setColor(Color.GREEN);
+      g.setColor(DARKGREEN);
       g.drawString(""+(i+1),(27-2*i)*h_unit/2, 21*v_unit/2);
       g.drawString(""+(i+1),(37-i)*h_unit/2,(11-i)*v_unit/2);
     }
+    g.setColor(DARKBLUE);
+    g.drawString(players[0]+": "+board.getTimeLeft(Colour.BLUE)/1000,9*h_unit,v_unit);
+    g.setColor(DARKGREEN);
+    g.drawString(players[1]+": "+board.getTimeLeft(Colour.GREEN)/1000,16*h_unit,9*v_unit);
+    g.setColor(DARKRED);
+    g.drawString(players[2]+": "+board.getTimeLeft(Colour.RED)/1000,h_unit,9*v_unit);
     for(Position pos: Position.values())squares[pos.ordinal()].setPiece(board.getPiece(pos));
     g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, FONTSIZE));
     for(Square sq: squares) sq.draw(g);
-    g.setColor(Color.BLUE);
-    g.drawString(players[0]+": "+board.getTimeLeft(Colour.BLUE)/1000,9*h_unit,v_unit);
-    g.setColor(Color.GREEN);
-    g.drawString(players[1]+": "+board.getTimeLeft(Colour.GREEN)/1000,16*h_unit,9*v_unit);
-    g.setColor(Color.RED);
-    g.drawString(players[2]+": "+board.getTimeLeft(Colour.RED)/1000,h_unit,9*v_unit);
   }
 
   //calculates the coordinates of flanks for computing square coordinates.

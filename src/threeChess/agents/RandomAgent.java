@@ -9,21 +9,16 @@ import threeChess.*;
  * the history of the game and whose turn it is, and they respond with a move, 
  * expressed as a pair of positions.
  * **/ 
-public class ManualAgent extends Agent{
+public class RandomAgent extends Agent{
   
-  private String name = "Manual Agent";
+  private String name = "Rando";
 
 
   /**
    * A no argument constructor, 
    * required for tournament management.
    * **/
-  public ManualAgent(){
-  }
-
-  public ManualAgent(String name){
-    this.name = name;
-    System.out.println(name+" is a manually controlled agent.\n To make a move enter the satring position followed by a spec and then the end position of your move.\n For example,\nBD2 BD4\n will specify the blue pawn in front of the queen should move 2 squares forward.");
+  public RandomAgent(){
   }
 
   /**
@@ -38,21 +33,24 @@ public class ManualAgent extends Agent{
    * position to move that piece to.
    * **/
   public Position[] playMove(Board board){
-    System.out.println(board.getTurn()+"'s move:");
-    Scanner sc = new Scanner(System.in);
-    while(true){
+    Position[] pieces = board.getPositions(board.getTurn()).toArray(new Position[0]);
+    Position start = pieces[0];
+    Position end = pieces[0]; //dummy illegal move
+    while(!board.isLegalMove(start, end)){
+      start = pieces[(int) (Math.random()*pieces.length)];
+      Piece mover = board.getPiece(start);
+      Direction[][] steps = mover.getType().getSteps();
+      Direction[] step = steps[(int)(Math.random()*steps.length)];
+      int reps = 1;
+      if(mover.getType()==PieceType.BISHOP || mover.getType()==PieceType.ROOK || mover.getType()==PieceType.QUEEN)
+        reps =((int) (Math.random()*8))+1;
+      end = start;
       try{
-        String moveString = sc.nextLine();
-        String[] pos = moveString.split("\\s");
-        Position start = Position.valueOf(pos[0]);
-        Position end = Position.valueOf(pos[1]);
-        if(board.isLegalMove(start, end)) return new Position[]{start,end};
-        else System.out.println("Illegal move, try again.");
-      }
-      catch(IllegalArgumentException e){
-        System.out.println("Invalid move format. Use style \"BA1 RA1\".");
-      }
-    } 
+        for(int i = 0; i<reps; i++)
+          end = board.step(mover, step, end);
+      }catch(ImpossiblePositionException e){}
+    }
+    return new Position[] {start,end};
   }
 
   /**
