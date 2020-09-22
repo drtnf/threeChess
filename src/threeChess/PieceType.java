@@ -1,7 +1,7 @@
 package threeChess;
 
 /**
- * Enumeration of the differen piece types.
+ * Enumeration of the different piece types.
  * Values are included for scoring purposes,
  * using the typical values, but 40 for the King.
  * **/
@@ -11,7 +11,7 @@ public enum PieceType{
   BISHOP(3),
   ROOK(5),
   QUEEN(9),
-  KING(40);//worth one more than all the other pieces combined. 
+  KING(40);//worth one more than all the other pieces combined.
 
   /**the utility associated with taking this piece**/
   private final int value;
@@ -66,14 +66,32 @@ public enum PieceType{
    * Rooks, Bishops and Queens may iterate one step type in a move.
    * All other pieces may only make one step per move.
    * @return an array or arrays of directions where each inner array is a legitimate step.
-   * **/ 
+   * **/
   public Direction[][] getSteps(){
     switch(this){
     case PAWN: return pawnSteps();
     case KNIGHT: return knightSteps();
     case BISHOP: return bishopSteps();
-    case ROOK: return rookSteps(); 
-    default: return kingSteps();//Kings and queens have the same steps, but queens may repeat the one step. 
+    case ROOK: return rookSteps();
+    default: return kingSteps();//Kings and queens have the same steps, but queens may repeat the one step.
+    }
+  }
+
+  /**
+   * Returns the number of repetitions of a step are allowed.
+   * Rooks, Bishops and Queens may iterate one step type in a move.
+   * All other pieces may only make one step per move.
+   * @return the number of repetitions allowed.
+   */
+  public int getStepReps() {
+    switch(this){
+      case ROOK:
+      case QUEEN:
+      case BISHOP:
+        return 8;
+      default:
+        // Kings, pawns, and knights cannot repeat their moves.
+        return 1;
     }
   }
 

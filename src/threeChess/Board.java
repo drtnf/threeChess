@@ -1,9 +1,6 @@
 package threeChess;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Main class for representing game state.
@@ -63,11 +60,11 @@ public class Board implements Cloneable{
    * **/
   public Set<Position> getPositions(Colour player){
     HashSet<Position> positions = new HashSet<Position>();
-    for(Position p: Position.values()){
-      if(board.get(p)!=null && board.get(p).getColour()==player)
-       positions.add(p);
+    for(Position p : Position.values()){
+      if(board.containsKey(p) && board.get(p).getColour()==player)
+        positions.add(p);
     }
-    return positions; 
+    return positions;
   }
 
   /**
@@ -133,8 +130,6 @@ public class Board implements Cloneable{
     Piece target = getPiece(end);
     if(mover==null) return false;//you must move a piece
     Colour mCol =mover.getColour();
-    Colour sCol = start.getColour();
-    Colour eCol = end.getColour();
     if(mCol!=turn) return false;//it must be your turn
     if(target!= null && mCol==target.getColour())return false; //you can't take your own piece
     Direction[][] steps = mover.getType().getSteps();
@@ -343,10 +338,11 @@ public class Board implements Cloneable{
           if(taken.getType()==PieceType.KING) return c;
         }
         if(timeLeft.get(c)<0){
-          Colour winner = null; int max = -1000;
+          Colour winner = null; int max = Integer.MIN_VALUE;
           for(Colour d: Colour.values()){
-            if(d!=c && score(d)>max){
-              winner = d; max = score(d);
+            int score = score(d);
+            if(d!=c && score>max){
+              winner = d; max = score;
             }
           }
           return winner;

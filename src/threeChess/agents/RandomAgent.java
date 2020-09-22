@@ -1,7 +1,8 @@
 package threeChess.agents;
 
-import java.util.*;
 import threeChess.*;
+
+import java.util.Random;
 
 /**
  * An interface for AI bots to implement.
@@ -11,7 +12,8 @@ import threeChess.*;
  * **/ 
 public class RandomAgent extends Agent{
   
-  private String name = "Rando";
+  private static final String name = "Random";
+  private static final Random random = new Random();
 
 
   /**
@@ -36,14 +38,12 @@ public class RandomAgent extends Agent{
     Position[] pieces = board.getPositions(board.getTurn()).toArray(new Position[0]);
     Position start = pieces[0];
     Position end = pieces[0]; //dummy illegal move
-    while(!board.isLegalMove(start, end)){
-      start = pieces[(int) (Math.random()*pieces.length)];
+    while (!board.isLegalMove(start, end)){
+      start = pieces[random.nextInt(pieces.length)];
       Piece mover = board.getPiece(start);
       Direction[][] steps = mover.getType().getSteps();
-      Direction[] step = steps[(int)(Math.random()*steps.length)];
-      int reps = 1;
-      if(mover.getType()==PieceType.BISHOP || mover.getType()==PieceType.ROOK || mover.getType()==PieceType.QUEEN)
-        reps =((int) (Math.random()*8))+1;
+      Direction[] step = steps[random.nextInt(steps.length)];
+      int reps = 1 + random.nextInt(mover.getType().getStepReps());
       end = start;
       try{
         for(int i = 0; i<reps; i++)
