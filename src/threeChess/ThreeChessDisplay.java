@@ -85,7 +85,7 @@ public class ThreeChessDisplay extends JFrame{
     }      
 
     /**
-     * Renders the square wit a black border, 
+     * Renders the square with a black border, 
      * and a light colour if parity is even, 
      * and the piece in the board.
      * The graphics object should be updated after this method is called.

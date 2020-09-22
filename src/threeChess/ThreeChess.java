@@ -31,7 +31,7 @@ public class ThreeChess{
 
     /**
      * Updates the Statistics objects with the score from a game.
-     * @param score -2 if an illegal move is attempt, -1 for a loss, 0 fro a draw and +1 for a win.
+     * @param score -2 if an illegal move is attempt, -1 for a loss, 0 for a draw and +1 for a win.
      * **/
     public void update(int score){
       switch(score){
@@ -56,7 +56,7 @@ public class ThreeChess{
 
     /**
      * @param stats the object to compare to.
-     * @return -1 if this object has a higher average than the paramater, 0 if the averages are equivalent and +1 if it has a loiwer average score.
+     * @return -1 if this object has a higher average than the paramater, 0 if the averages are equivalent and +1 if it has a lower average score.
      * **/
     public int compareTo(Object o){
       if(o instanceof Statistics){
@@ -74,12 +74,12 @@ public class ThreeChess{
 
   /**
    * Runs a tournament for a group of agents.
-   * Thegames in the tournament will have the specified time limit.
+   * The games in the tournament will have the specified time limit.
    * If a non-zero number of games are specified, the agents will be randomly assigned to games.
-   * If 0 is specified, every agent will play every pother pair of agents, with the colours of the pieces randomly assigned.
-   * @param bots an array of Agents to compete in  the contest.
-   * @param timeLimit the culmative time each player has (in seconds). To specify an untimed game, set as less than or equal to zero.
-   * @param displayOn a boolen flag for whether the game should be graphically displayed
+   * If 0 is specified, every agent will play every other pair of agents, with the colours of the pieces randomly assigned.
+   * @param bots an array of Agents to compete in the contest.
+   * @param timeLimit the cumulative time each player has (in seconds). To specify an untimed game, set as less than or equal to zero.
+   * @param displayOn a boolean flag for whether the game should be graphically displayed
    * @param logFile a FileName to print the game logs to. If this can't be found, or is null, System.out will be used instead.
    * **/
   public static void  tournament(Agent[] bots, int timeLimit, int numGames, Boolean displayOn, String logFile){
@@ -102,7 +102,7 @@ public class ThreeChess{
         }
       }
     }
-    else{//play randomly assigned games. Note agaents may play themselves.
+    else{//play randomly assigned games. Note agents may play themselves.
       int n = bots.length;
       for(int g = 0; g<numGames; g++){
         int[] players = {(int) Math.random()*n, (int) Math.random()*n, (int) Math.random()*n};
@@ -126,15 +126,15 @@ public class ThreeChess{
    * @param blue the agent playing the blue pieces.
    * @param green the agent playing the green pieces.
    * @param red the Agent playing the red pieces.
-   * @param timeLimit the culmative time each player has (in seconds). To specify an untimed game, set as less than or equal to zero.
+   * @param timeLimit the cumulative time each player has (in seconds). To specify an untimed game, set as less than or equal to zero.
    * @param logger a printStream to write the game moves to.
-   * @param displayOn a boolen flag for whether the game should be graphically displayed
+   * @param displayOn a boolean flag for whether the game should be graphically displayed
    * @return an array of three ints, the scores for blue, green and red, in that order.
    * **/
   public static int[] play(Agent blue, Agent green, Agent red, int timeLimit, PrintStream logger, boolean displayOn){
     Board board = new Board(timeLimit>0?timeLimit*1000:1);
     boolean timed = timeLimit>0;
-    logger.println("======NEw GAME======");
+    logger.println("======NEW GAME======");
     logger.println("BLUE: "+blue.toString());
     logger.println("GREEN: "+green.toString());
     logger.println("RED: "+red.toString());
@@ -186,7 +186,7 @@ public class ThreeChess{
    * with a graphical board and moves logged to System.out.
    * @param blue the agent playing the blue pieces.
    * @param green the agent playing the green pieces.
-   * @param red the Agent playing the red pieces.
+   * @param red the agent playing the red pieces.
    * @return an array of three ints, the scores for blue, green and red, in that order.
    * **/
   public static int[] play(Agent blue, Agent green, Agent red){
