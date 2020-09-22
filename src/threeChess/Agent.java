@@ -2,7 +2,7 @@ package threeChess;
 
 /**
  * An interface for AI bots to implement.
- * They are simply give a Board object indicating the positions of all pieces, 
+ * They are simply given a Board object indicating the positions of all pieces, 
  * the history of the game and whose turn it is, and they respond with a move, 
  * expressed as a pair of positions.
  * For Agents submitted to the CITS3001 tournament, 

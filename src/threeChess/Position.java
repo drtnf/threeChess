@@ -33,15 +33,15 @@ public enum Position{
   RG1(Colour.RED,0,6), RG2(Colour.RED,1,6), RG3(Colour.RED,2,6), RG4(Colour.RED,3,6),
   RH1(Colour.RED,0,7), RH2(Colour.RED,1,7), RH3(Colour.RED,2,7), RH4(Colour.RED,3,7);
 
-  /**The posiiton's colour**/
+  /**The position's colour**/
   private final Colour colour; //red blue green
-  /**The positions row**/
+  /**The position's row**/
   private final int row; //0-3
-  /**The posiiton's column**/
+  /**The position's column**/
   private final int column; //0-7
 
   /**
-   * Create a posiiton a with the specified colour, row and column
+   * Create a position with the specified colour, row and column
    * @param colour the section of the board the position is in.
    * @param row the row number (0-3) of the position.
    * @param column the column number (0-7) of the position.
@@ -50,7 +50,7 @@ public enum Position{
     this.colour = colour; this.row = row; this.column = column;
   }
 
-  /**@return the posiiton's colour**/
+  /**@return the position's colour**/
   public Colour getColour(){return colour;}
   /**@return the position's row**/
   public int getRow(){return row;}
@@ -58,8 +58,8 @@ public enum Position{
   public int getColumn(){return column;}
 
   /**
-   * Gets the posiiton corresponding to the specified colour, row and column.
-   * @return the posiiton of the specified colour, row and column
+   * Gets the position corresponding to the specified colour, row and column.
+   * @return the position of the specified colour, row and column
    * @throws ImpossiblePositionException if outside the bounds of the board.
    * **/
   public static Position get(Colour colour, int row, int column) throws ImpossiblePositionException{
