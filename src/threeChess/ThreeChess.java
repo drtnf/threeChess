@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.HashMap;
 import threeChess.agents.*;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Class with static methods for running tournaments and playing threeChess matches.
@@ -13,6 +14,7 @@ public class ThreeChess{
 
   private final static int pause = 1000;//The pause in milliseconds between updating the graphical board
   private final static int[][] perms = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};//to randomise play order
+  private final static Random random = new Random();
   
   /**
    * A private class for representing the statistics of an agent in a tournament.
@@ -61,11 +63,7 @@ public class ThreeChess{
     public int compareTo(Object o){
       if(o instanceof Statistics){
         Statistics stats = (Statistics) o;
-        int val1 = (won-lost)*stats.played;
-        int val2 = (stats.won-stats.lost)*played;
-        if(val1>val2) return -1;
-        else if(val1==val2) return 0;
-        else return 1;
+        return Double.compare(stats.average(), average());
       } else return -1;
     }
   }
@@ -95,7 +93,7 @@ public class ThreeChess{
         for(int j = i+1; j<bots.length; j++){
           for(int k = j+1; k<bots.length; k++){
             int[] players = {i,j,k};
-            int[] ord = perms[(int) (Math.random()*6)];
+            int[] ord = perms[random.nextInt(perms.length)];
             int[] res = play(bots[players[ord[0]]],bots[players[ord[1]]],bots[players[ord[2]]], timeLimit, logger, displayOn);
             for(int o = 0; o<3;o++)scoreboard.get(bots[players[ord[o]]]).update(res[ord[o]]);
           }
@@ -105,8 +103,8 @@ public class ThreeChess{
     else{//play randomly assigned games. Note agents may play themselves.
       int n = bots.length;
       for(int g = 0; g<numGames; g++){
-        int[] players = {(int) Math.random()*n, (int) Math.random()*n, (int) Math.random()*n};
-        int res[] = play(bots[players[0]],bots[players[1]],bots[players[2]], timeLimit, logger, displayOn);
+        int[] players = {random.nextInt(n), random.nextInt(n), random.nextInt(n)};
+        int[] res = play(bots[players[0]],bots[players[1]],bots[players[2]], timeLimit, logger, displayOn);
         for(int o = 0; o<3;o++)scoreboard.get(bots[players[o]]).update(res[o]);
       }
     }
@@ -144,7 +142,7 @@ public class ThreeChess{
     while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
       Colour colour = board.getTurn();
       Agent current = (colour==Colour.BLUE?blue:(colour==Colour.GREEN?green:red));
-      long startTime = System.currentTimeMillis();
+      long startTime = System.nanoTime();
       Position[] move = null;
       try{
         move = current.playMove((Board)board.clone());
@@ -154,7 +152,7 @@ public class ThreeChess{
       //set board as a variable
       //run executes the move method
       //setup a timeout?
-      long time = System.currentTimeMillis()-startTime;
+      long time = (System.nanoTime() - startTime + 500_000L) / 1_000_000L; // Rounds to nearest millisecond
       if(move!=null && move.length==2 && board.isLegalMove(move[0],move[1])){
         try{
           board.move(move[0],move[1],(timed?(int)time:0));
@@ -162,7 +160,8 @@ public class ThreeChess{
           if(displayOn){
             try{Thread.sleep(pause);}
             catch(InterruptedException e){} 
-            display.repaint();}
+            display.repaintCanvas();
+          }
         }
         catch(ImpossiblePositionException e){logger.println(e.getMessage());}
       }
@@ -190,7 +189,7 @@ public class ThreeChess{
    * @return an array of three ints, the scores for blue, green and red, in that order.
    * **/
   public static int[] play(Agent blue, Agent green, Agent red){
-    return play(blue, green, red, 0, null, true);
+    return play(blue, green, red, 0, System.out, true);
   }
   
   /**

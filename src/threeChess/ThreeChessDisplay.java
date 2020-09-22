@@ -1,9 +1,10 @@
 package threeChess;
 
 import java.awt.*;
-import javax.swing.JFrame;
+import java.awt.font.FontRenderContext;
+import javax.swing.*;
 
-public class ThreeChessDisplay extends JFrame{
+public class ThreeChessDisplay extends JFrame {
 
   private static final Color DARKRED = new Color(127,0,0);
   private static final Color RED = new Color(255,102,102);
@@ -17,6 +18,7 @@ public class ThreeChessDisplay extends JFrame{
   private static final int FONTSIZE = 32;
   private Square[] squares;
   private String[] players;
+  private Canvas canvas;
   private Board board;
   private int size = 800;
   private static int[][][] flanks;
@@ -43,20 +45,28 @@ public class ThreeChessDisplay extends JFrame{
       xs = new int[4]; ys = new int[4]; //lower left, lower right, upper right, upper left.
       int[] left = flanks[colour.ordinal()][(c<4?0:1)];//coords of left margin
       int[] right = flanks[colour.ordinal()][(c<4?1:2)];//coords of right margin.
-      int[] baseLine = new int[4];
-      int[] topLine = new int[4];
-      baseLine[0] = left[0]+((left[2]-left[0])/4)*r;
-      baseLine[1] = left[1]+((left[3]-left[1])/4)*r;
-      baseLine[2] = right[0]+((right[2]-right[0])/4)*r;
-      baseLine[3] = right[1]+((right[3]-right[1])/4)*r;
-      topLine[0] = left[0]+((left[2]-left[0])/4)*(r+1);
-      topLine[1] = left[1]+((left[3]-left[1])/4)*(r+1);
-      topLine[2] = right[0]+((right[2]-right[0])/4)*(r+1);
-      topLine[3] = right[1]+((right[3]-right[1])/4)*(r+1);
-      xs[0] = baseLine[0]+((baseLine[2]-baseLine[0])/4)*(c%4); ys[0] = baseLine[1]+((baseLine[3]-baseLine[1])/4)*(c%4);  //bottom left
-      xs[1] = baseLine[0]+((baseLine[2]-baseLine[0])/4)*(c%4+1); ys[1] = baseLine[1]+((baseLine[3]-baseLine[1])/4)*(c%4+1);  //bottom right
-      xs[2] = topLine[0]+((topLine[2]-topLine[0])/4)*(c%4+1); ys[2] = topLine[1]+((topLine[3]-topLine[1])/4)*(c%4+1);  //top right
-      xs[3] = topLine[0]+((topLine[2]-topLine[0])/4)*(c%4); ys[3] = topLine[1]+((topLine[3]-topLine[1])/4)*(c%4);  //top left
+      double[] baseLine = new double[4];
+      double[] topLine = new double[4];
+      baseLine[0] = left[0]+((left[2]-left[0])/4.0d)*r;
+      baseLine[1] = left[1]+((left[3]-left[1])/4.0d)*r;
+      baseLine[2] = right[0]+((right[2]-right[0])/4.0d)*r;
+      baseLine[3] = right[1]+((right[3]-right[1])/4.0d)*r;
+      topLine[0] = left[0]+((left[2]-left[0])/4.0d)*(r+1);
+      topLine[1] = left[1]+((left[3]-left[1])/4.0d)*(r+1);
+      topLine[2] = right[0]+((right[2]-right[0])/4.0d)*(r+1);
+      topLine[3] = right[1]+((right[3]-right[1])/4.0d)*(r+1);
+      //bottom left
+      xs[0] = (int) (baseLine[0]+((baseLine[2]-baseLine[0])/4.0d)*(c%4));
+      ys[0] = (int) (baseLine[1]+((baseLine[3]-baseLine[1])/4.0d)*(c%4));
+      //bottom right
+      xs[1] = (int) (baseLine[0]+((baseLine[2]-baseLine[0])/4.0d)*(c%4+1));
+      ys[1] = (int) (baseLine[1]+((baseLine[3]-baseLine[1])/4.0d)*(c%4+1));
+      //top right
+      xs[2] = (int) (topLine[0]+((topLine[2]-topLine[0])/4.0d)*(c%4+1));
+      ys[2] = (int) (topLine[1]+((topLine[3]-topLine[1])/4.0d)*(c%4+1));
+      //top left
+      xs[3] = (int) (topLine[0]+((topLine[2]-topLine[0])/4.0d)*(c%4));
+      ys[3] = (int) (topLine[1]+((topLine[3]-topLine[1])/4.0d)*(c%4));
     }
 
     // just returns the mean of all the coordinates
@@ -66,8 +76,8 @@ public class ThreeChessDisplay extends JFrame{
         centre[0]+=xs[i];
         centre[1]+=ys[i];
       }
-      centre[0]=centre[0]/4-FONTSIZE/2;
-      centre[1] = centre[1]/4+FONTSIZE/2;
+      centre[0] = centre[0]/4 - FONTSIZE/2;
+      centre[1] = centre[1]/4 + FONTSIZE*2/5;
       return centre;
     }
 
@@ -115,8 +125,21 @@ public class ThreeChessDisplay extends JFrame{
   public ThreeChessDisplay(Board board, String bluePlayer, String greenPlayer, String redPlayer){
     super("ThreeChess");
     this.board = board;
-    setSize(size,size);
+
+    canvas = new Canvas();
+    setBounds(0, 0, size, size);
+    setPreferredSize(new Dimension(size, size));
+    add(canvas);
+    canvas.setPreferredSize(new Dimension(size, size));
+    canvas.setIgnoreRepaint(true);
+
+    pack();
+    setLocationRelativeTo(null);
+    setResizable(false);
     setVisible(true);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    canvas.createBufferStrategy(2);
+
     setFlanks(size);
     players = new String[3];
     squares = new Square[96];
@@ -124,41 +147,58 @@ public class ThreeChessDisplay extends JFrame{
     players[0] = bluePlayer;
     players[1] = greenPlayer;
     players[2] = redPlayer;
-    repaint();
+    repaintCanvas();
   }
 
-  //updates the graphics component, then the window
-  public void paint(Graphics g){
-    setBackground(Color.LIGHT_GRAY);
+  private Graphics2D getCanvasGraphics() {
+    Graphics2D g = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
     g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, FONTSIZE/2));
-    Graphics2D g2 = (Graphics2D) g;
-    g2.setStroke(new BasicStroke(3));
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    return g;
+  }
+
+  /** Repaints the board to the canvas. **/
+  public void repaintCanvas(){
+    Graphics2D g = getCanvasGraphics();
+    try {
+      drawToCanvas(g);
+    } finally {
+      g.dispose();
+      canvas.getBufferStrategy().show();
+    }
+  }
+
+  public void drawToCanvas(Graphics2D g) {
+    g.setColor(Color.LIGHT_GRAY);
+    g.fillRect(0, 0, getWidth(), getHeight());
+    g.setStroke(new BasicStroke(3));
+
     int h_unit = size/20;
     int v_unit =(int) (Math.sqrt(3)*h_unit);
     for(int i=0; i<8; i++){
       String label = ""+((char)(65+i));
       g.setColor(DARKBLUE);
-      g.drawString(label, (27-2*i)*h_unit/2,7*v_unit/4);
+      g.drawString(label, (27-2*i)*h_unit/2,15*v_unit/8);
       g.setColor(DARKRED);
-      g.drawString(label,(4+i)*h_unit/2,(13+i)*v_unit/2);
+      g.drawString(label,(7+2*i)*h_unit/4,(13+i)*v_unit/2);
       g.setColor(DARKGREEN);
       g.drawString(label,(29+i)*h_unit/2,(20-i)*v_unit/2);
     }
     for(int i = 0; i<4; i++){
       g.setColor(DARKBLUE);
-      g.drawString(""+(i+1), (10-i)*h_unit/2, (4+i)*v_unit/2);
-      g.drawString(""+(i+1), (30+i)*h_unit/2, (4+i)*v_unit/2);
+      g.drawString(""+(i+1), (21-2*i)*h_unit/4, (9+2*i)*v_unit/4);
+      g.drawString(""+(i+1), (29+i)*h_unit/2, (9+2*i)*v_unit/4);
       g.setColor(DARKRED);
-      g.drawString(""+(i+1),(3+i)*h_unit/2, (11-i)*v_unit/2);
-      g.drawString(""+(i+1),(13+2*i)*h_unit/2,21*v_unit/2);
+      g.drawString(""+(i+1),(7+2*i)*h_unit/4, (23-2*i)*v_unit/4);
+      g.drawString(""+(i+1),(13+2*i)*h_unit/2,83*v_unit/8);
       g.setColor(DARKGREEN);
-      g.drawString(""+(i+1),(27-2*i)*h_unit/2, 21*v_unit/2);
-      g.drawString(""+(i+1),(37-i)*h_unit/2,(11-i)*v_unit/2);
+      g.drawString(""+(i+1),(27-2*i)*h_unit/2, 83*v_unit/8);
+      g.drawString(""+(i+1),(36-i)*h_unit/2,(23-2*i)*v_unit/4);
     }
     g.setColor(DARKBLUE);
     g.drawString(players[0]+": "+board.getTimeLeft(Colour.BLUE)/1000,9*h_unit,v_unit);
     g.setColor(DARKGREEN);
-    g.drawString(players[1]+": "+board.getTimeLeft(Colour.GREEN)/1000,16*h_unit,9*v_unit);
+    g.drawString(players[1]+": "+board.getTimeLeft(Colour.GREEN)/1000,33*h_unit/2,9*v_unit);
     g.setColor(DARKRED);
     g.drawString(players[2]+": "+board.getTimeLeft(Colour.RED)/1000,h_unit,9*v_unit);
     for(Position pos: Position.values())squares[pos.ordinal()].setPiece(board.getPiece(pos));
@@ -183,7 +223,3 @@ public class ThreeChessDisplay extends JFrame{
   }
 
 }
-
-
-
-
