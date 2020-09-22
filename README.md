@@ -67,7 +67,7 @@ There are a range of other classes as well, but those are the important one.
 
 To clone this repo use git clone https://github.com/drtnf/threeChess.git
 
-To compile the files, in the root directory use javac -d bin src/threeChess/\*.java src src/threeChess/agents/\*.java
+To compile the files, in the root directory use javac -d bin src/threeChess/\*.java src/threeChess/agents/\*.java
 
 To run a basic game use java -cp bin/ threeChess.ThreeChess 
 
