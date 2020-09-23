@@ -161,6 +161,7 @@ public class ThreeChess{
             try{Thread.sleep(pause);}
             catch(InterruptedException e){} 
             display.repaintCanvas();
+            //display.repaint();
           }
         }
         catch(ImpossiblePositionException e){logger.println(e.getMessage());}

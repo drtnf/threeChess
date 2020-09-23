@@ -22,8 +22,8 @@ public class ThreeChessDisplay extends JFrame {
   private Board board;
   private int size = 800;
   private static int[][][] flanks;
-  //set up 96 polygons here?
-  //no use board/Position to build them
+  
+  //To represent each square of the board.
   private class Square{
     int[] xs;//4 x-coords
     int[] ys;//4 y-coords
@@ -135,7 +135,7 @@ public class ThreeChessDisplay extends JFrame {
 
     pack();
     setLocationRelativeTo(null);
-    setResizable(false);
+    setResizable(false);// true seems to make it work in Ubuntu????
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     canvas.createBufferStrategy(2);
@@ -157,15 +157,24 @@ public class ThreeChessDisplay extends JFrame {
     return g;
   }
 
+  /**
+   * delegate to the repaintCanvas method, when paint() is called.
+   * @param g A graphics context for the Frame.
+   * **/
+  public void paint(Graphics g){
+    repaintCanvas();
+  }
+
   /** Repaints the board to the canvas. **/
   public void repaintCanvas(){
     Graphics2D g = getCanvasGraphics();
     try {
       drawToCanvas(g);
-    } finally {
-      g.dispose();
-      canvas.getBufferStrategy().show();
     }
+    finally {
+      g.dispose();
+    }
+    canvas.getBufferStrategy().show();
   }
 
   public void drawToCanvas(Graphics2D g) {
