@@ -191,7 +191,6 @@ public class Board implements Cloneable{
           try{
             Position tmp = step(mover,step,start);
             while(end != tmp && board.get(tmp)==null){
-              tmp = step(mover, step,tmp);
               if(tmp.getColour()!=start.getColour()){//flip steps when moving between board sections.
                 step = new Direction[steps[i].length];
                 for(int j = 0; j<steps[i].length; j++){
@@ -203,6 +202,7 @@ public class Board implements Cloneable{
                   }
                 }
               }
+              tmp = step(mover, step,tmp);
             }
             if(end==tmp) return true;
           }catch(ImpossiblePositionException e){}//do nothing, steps went off board.
