@@ -20,7 +20,7 @@ public class Board implements Cloneable{
   /**The moves taken so far, represented as an array of two positions, the start and end of the move**/
   private ArrayList<Position[]> history;//can only be changed by taking moves
   /**A map indicating which player has taken which piece, to support alternative scoring methods**/
-  private HashMap<Colour,HashSet<Piece>> captured;
+  private HashMap<Colour,ArrayList<Piece>> captured;
   /**A Map representing the remaining time allowed for each player, in milliseconds**/
   private HashMap<Colour,Integer> timeLeft;
 
@@ -44,10 +44,10 @@ public class Board implements Cloneable{
       }
     }catch(ImpossiblePositionException e){}//no impossible positions in this code
     history = new ArrayList<Position[]>();
-    captured = new HashMap<Colour,HashSet<Piece>>();
+    captured = new HashMap<Colour,ArrayList<Piece>>();
     timeLeft = new HashMap<Colour,Integer>();
     for(Colour c: Colour.values()){
-      captured.put(c,new HashSet<Piece>());
+      captured.put(c,new ArrayList<>());
       timeLeft.put(c,time);
     }
   }
@@ -72,6 +72,13 @@ public class Board implements Cloneable{
   }
 
   /**
+   * @return a set of all the pieces captured by {@param player}.
+   */
+  public List<Piece> getCaptured(Colour player) {
+    return new ArrayList<>(captured.get(player));
+  }
+
+  /**
    * Gets the piece at a specified position.
    * @param position the position of the piece,
    * @return the piece at that position or null, if the position is vacant.
@@ -89,7 +96,7 @@ public class Board implements Cloneable{
    * @param step an array of the direction sequence in the step
    * @param current the starting position of the step.
    * @return the position at the end of the step.
-   * @throws ImpossibleMoveException if the step takes piece off the board.
+   * @throws ImpossiblePositionException if the step takes piece off the board.
    * **/
   public Position step(Piece piece, Direction[] step, Position current) throws ImpossiblePositionException{
     boolean reverse = false;
@@ -294,7 +301,7 @@ public class Board implements Cloneable{
    * returns the move made at the corresponding index (starting from 1).
    * @param index the index of the move
    * @return an array containing the start position and the end position of the move, in that order
-   * @throws ArrayIndexOutOfBounds if the index does not correspond to a move. 
+   * @throws ArrayIndexOutOfBoundsException if the index does not correspond to a move.
    * **/
   public Position[] getMove(int index){
     if(0<=index && index<getMoveCount()){
@@ -392,8 +399,8 @@ public class Board implements Cloneable{
     clone.history = new ArrayList<Position[]>();
     for(Position[] move: history) clone.history.add(move.clone());
     clone.timeLeft = (HashMap<Colour,Integer>) timeLeft.clone();
-    clone.captured = new HashMap<Colour,HashSet<Piece>>();
-    for(Colour c: Colour.values()) clone.captured.put(c, (HashSet<Piece>) captured.get(c).clone());
+    clone.captured = new HashMap<Colour,ArrayList<Piece>>();
+    for(Colour c: Colour.values()) clone.captured.put(c, (ArrayList<Piece>) captured.get(c).clone());
     return clone;
   }
 }
