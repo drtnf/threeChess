@@ -79,7 +79,7 @@ public class Board implements Cloneable{
   /**
    * Performs one step of a move such as the L shaped move of a knight, or a diagonal step of a Bishop.
    * Rooks, Bishops and Queens may iterate one step repeatedly, but all other pieces can only move one step per move.
-   * Note the colour of the piece is relevant as moving forward past the 4th row is actually moving backwards realtive to the board.
+   * Note the colour of the piece is relevant as moving forward past the 4th row is actually moving backwards relative to the board.
    * It does not check whether the move is legal or possible. 
    * @param piece the piece being moved
    * @param step an array of the direction sequence in the step
@@ -234,7 +234,7 @@ public class Board implements Cloneable{
         if(mover.getType()==PieceType.PAWN && end.getRow()==0 && end.getColour()!=mover.getColour())
           board.put(end, new Piece(PieceType.QUEEN, mover.getColour()));//promote pawn if back rank
         else board.put(end,mover);//move piece
-        if(mover.getType()==PieceType.KING && start.getColumn()==4){
+        if(mover.getType()==PieceType.KING && start.getColumn()==4 && start.getRow()==0){
           if(end.getColumn()==2){//castle left, update rook
             Position rookPos = Position.get(mover.getColour(),0,0);
             board.put(Position.get(mover.getColour(),0,3),board.get(rookPos));
