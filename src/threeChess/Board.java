@@ -85,18 +85,13 @@ public class Board implements Cloneable{
    * @param step an array of the direction sequence in the step
    * @param current the starting position of the step.
    * @return the position at the end of the step.
-   * @throws ImpossibleMoveException if the step takes piece off the board.
+   * @throws ImpossiblePositionException if the step takes piece off the board.
    * **/
   public Position step(Piece piece, Direction[] step, Position current) throws ImpossiblePositionException{
     boolean reverse = false;
     for(Direction d: step){
       if((piece.getColour()!=current.getColour() && piece.getType() == PieceType.PAWN) || reverse){//reverse directions for knights
-        switch(d){
-          case FORWARD: d = Direction.BACKWARD; break;
-          case BACKWARD: d = Direction.FORWARD; break;
-          case LEFT: d = Direction.RIGHT; break;
-          case RIGHT: d = Direction.LEFT; break;
-        }
+        d = d.reverse();
       }
       Position next = current.neighbour(d);
       if(next.getColour()!= current.getColour()){//need to reverse directions when switching between sections of the board
@@ -192,15 +187,7 @@ public class Board implements Cloneable{
             Position tmp = step(mover,step,start);
             while(end != tmp && board.get(tmp)==null){
               if(tmp.getColour()!=start.getColour()){//flip steps when moving between board sections.
-                step = new Direction[steps[i].length];
-                for(int j = 0; j<steps[i].length; j++){
-                  switch(steps[i][j]){
-                    case FORWARD: step[j] = Direction.BACKWARD; break;
-                    case BACKWARD: step[j] = Direction.FORWARD; break;
-                    case LEFT: step[j] = Direction.RIGHT; break;
-                    case RIGHT: step[j] = Direction.LEFT; break;
-                  }
-                }
+                step = Direction.reverse(steps[i]);
               }
               tmp = step(mover, step,tmp);
             }
@@ -250,7 +237,9 @@ public class Board implements Cloneable{
           captured.get(mover.getColour()).add(taken);
           if(taken.getType()==PieceType.KING) gameOver=true;
         }
-        turn = Colour.values()[(turn.ordinal()+1)%3];
+        if (!gameOver) {
+          turn = Colour.values()[(turn.ordinal()+1)%3];
+        }
       }
     }
     else throw new ImpossiblePositionException("Illegal Move: "+start+"-"+end);
@@ -290,7 +279,7 @@ public class Board implements Cloneable{
    * returns the move made at the corresponding index (starting from 1).
    * @param index the index of the move
    * @return an array containing the start position and the end position of the move, in that order
-   * @throws ArrayIndexOutOfBounds if the index does not correspond to a move. 
+   * @throws ArrayIndexOutOfBoundsException if the index does not correspond to a move.
    * **/
   public Position[] getMove(int index){
     if(0<=index && index<getMoveCount()){

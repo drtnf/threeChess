@@ -46,8 +46,13 @@ public class RandomAgent extends Agent{
       int reps = 1 + random.nextInt(mover.getType().getStepReps());
       end = start;
       try{
-        for(int i = 0; i<reps; i++)
-          end = board.step(mover, step, end);
+        for(int i = 0; i<reps; i++)  {
+            Position last = end;
+            end = board.step(mover, step, end);
+            if (last.getColour() != end.getColour()) {
+                step = Direction.reverse(step);
+            }
+        }
       }catch(ImpossiblePositionException e){}
     }
     return new Position[] {start,end};
