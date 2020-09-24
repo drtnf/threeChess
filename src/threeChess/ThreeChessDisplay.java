@@ -1,7 +1,7 @@
 package threeChess;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
+import java.util.List;
 import java.awt.geom.AffineTransform;
 import javax.swing.*;
 
@@ -16,10 +16,13 @@ public class ThreeChessDisplay extends JFrame {
   private static final Color DARKBLUE = new Color(0,0,127);
   private static final Color BLUE = new Color(102,102,255);
   private static final Color LIGHTBLUE = new Color(204,204,255);
+    private static final Color[] TEXT_COLOURS = {DARKBLUE, DARKGREEN, DARKRED};
   private static final int LABELS_FONTSIZE = 16;
   private static final int AGENTS_FONTSIZE = 24;
   private static final int PIECE_FONTSIZE = 32;
+  private static final int CAPTURED_FONTSIZE = 24;
   private static final int AGENT_NAME_MAX_LENGTH = 20;
+  private static final int CAPTURED_PER_ROW = 12;
   private final Square[] squares;
   private final String[] players;
   private final Canvas canvas;
@@ -211,39 +214,69 @@ public class ThreeChessDisplay extends JFrame {
       g.drawString(""+(i+1),(36-i)*h_unit/2,(23-2*i)*v_unit/4);
     }
 
-    g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, AGENTS_FONTSIZE));
-    g.setColor(DARKBLUE);
-    boolean blueActive = (board.getTurn() == Colour.BLUE);
-    String blueText = players[0] + ": " + (board.getTimeLeft(Colour.BLUE) / 1000);
-    drawAgentLabel(g, getWidth() / 2.0, v_unit, 0, blueText, blueActive);
-
-    g.setColor(DARKGREEN);
-    boolean greenActive = (board.getTurn() == Colour.GREEN);
-    String greenText = players[1] + ": " + (board.getTimeLeft(Colour.GREEN) / 1000);
-    drawAgentLabel(g, 17.5*h_unit, 8.5*v_unit, -Math.PI/3, greenText, greenActive);
-
-    g.setColor(DARKRED);
-    boolean redActive = (board.getTurn() == Colour.RED);
-    String redText = players[2] + ": " + (board.getTimeLeft(Colour.RED) / 1000);
-    drawAgentLabel(g, 2.5*h_unit, 8.5*v_unit, Math.PI/3, redText, redActive);
+    drawAgentLabel(g, getWidth() / 2.0, 1.25*v_unit, 0, Colour.BLUE);
+    drawAgentLabel(g, 17*h_unit, 8.5*v_unit, -Math.PI/3, Colour.GREEN);
+    drawAgentLabel(g, 3*h_unit, 8.5*v_unit, Math.PI/3, Colour.RED);
 
     g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, PIECE_FONTSIZE));
     for(Position pos: Position.values())squares[pos.ordinal()].setPiece(board.getPiece(pos));
     for(Square sq: squares) sq.draw(g);
   }
 
-  private static void drawAgentLabel(Graphics2D g, double x, double y, double angleRads, String string, boolean active) {
+  private void drawAgentLabel(Graphics2D g, double x, double y, double angleRads, Colour colour) {
+    // Get the information we want to display about the agent.
+    boolean winner = (board.getWinner() == colour);
+    boolean active = (!board.gameOver() && board.getTurn() == colour);
+    String text = players[colour.ordinal()] + ": " + (board.getTimeLeft(colour) / 1000);
+    StringBuilder takenString = new StringBuilder();
+    List<Piece> captured = board.getCaptured(colour);
+    for (Piece piece : captured) {
+        takenString.append(piece.getType().getChar());
+    }
+
+    // Rotate the text.
     AffineTransform orig = g.getTransform();
     g.translate(x, y);
     g.rotate(angleRads);
+
+    // Draw the agent's name.
+    Font previousFont = g.getFont();
+    g.setFont(new Font(previousFont.getFontName(), winner ? Font.BOLD : Font.PLAIN, AGENTS_FONTSIZE));
     FontMetrics metrics = g.getFontMetrics();
-    int width = metrics.stringWidth(string);
+    int width = metrics.stringWidth(text);
     int drawX = -width / 2;
     int drawY = metrics.getAscent() - metrics.getHeight() / 2;
-    g.drawString(string, drawX, drawY);
+    g.setColor(TEXT_COLOURS[colour.ordinal()]);
+    g.drawString(text, drawX, drawY);
+    g.setFont(previousFont);
+
+    // We add a * when it is the agent's turn.
     if (active) {
       g.drawString("*", drawX - metrics.stringWidth("*"), 0);
     }
+
+    // We draw the pieces the agent has taken below their name.
+    g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, CAPTURED_FONTSIZE));
+    metrics = g.getFontMetrics();
+    int lineHeight = metrics.getHeight() * (colour == Colour.BLUE ? -1 : 1);
+    int capturedY = drawY;
+
+    int rows = (takenString.length() + CAPTURED_PER_ROW - 1) / CAPTURED_PER_ROW;
+    for (int row = 0; row < rows; ++row) {
+        capturedY += lineHeight;
+        String line = takenString.substring(row * CAPTURED_PER_ROW, Math.min(takenString.length(), (row + 1) * CAPTURED_PER_ROW));
+        int takenWidth = metrics.stringWidth(line);
+        int capturedX = -takenWidth / 2;
+        for (int i=0; i < line.length(); ++i) {
+            Piece piece = captured.get(row * CAPTURED_PER_ROW + i);
+            String pieceStr = Character.toString(piece.getType().getChar());
+            g.setColor(TEXT_COLOURS[piece.getColour().ordinal()]);
+            g.drawString(pieceStr, capturedX, capturedY);
+            capturedX += metrics.stringWidth(pieceStr);
+        }
+    }
+
+    // Reset the rotation.
     g.setTransform(orig);
   }
 
