@@ -57,7 +57,7 @@ public class ThreeChess{
     public String toString(){return "name:"+ agent+", won:"+won+", lost:"+lost+", played:"+played+", avg:"+average();}
 
     /**
-     * @param stats the object to compare to.
+     * @param o the object to compare to.
      * @return -1 if this object has a higher average than the paramater, 0 if the averages are equivalent and +1 if it has a lower average score.
      * **/
     public int compareTo(Object o){
@@ -95,7 +95,7 @@ public class ThreeChess{
             int[] players = {i,j,k};
             int[] ord = perms[random.nextInt(perms.length)];
             int[] res = play(bots[players[ord[0]]],bots[players[ord[1]]],bots[players[ord[2]]], timeLimit, logger, displayOn);
-            for(int o = 0; o<3;o++)scoreboard.get(bots[players[ord[o]]]).update(res[ord[o]]);
+            for(int o = 0; o<3;o++)scoreboard.get(bots[players[ord[o]]]).update(res[o]);
           }
         }
       }
