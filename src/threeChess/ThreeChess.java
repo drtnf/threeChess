@@ -202,11 +202,45 @@ public class ThreeChess{
     play(man, man, man);
   }
 
+
+  /** 
+   * This plays amanual game where all rules are ignored.
+   * This effectively allows you to move pieces around the board for simulating positions.
+   * **/
+  public static void playCheat(){
+    Board board = new CheatBoard();
+    Agent agent = new ManualAgent();
+    ThreeChessDisplay display = new ThreeChessDisplay(board, "Blue", "Green", "Red");
+    while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
+      Colour colour = board.getTurn();
+      Position[] move = null;
+      try{
+        move = agent.playMove((Board)board.clone());
+      }catch(CloneNotSupportedException e){}
+      if(move!=null && move.length==2){
+        try{
+          board.move(move[0],move[1],0);
+          display.repaintCanvas();
+        }
+        catch(ImpossiblePositionException e){System.out.println(e.getMessage());}
+      }
+    }
+  }
+
+
+  /**
+   * This method can be customised to run tournaments with agents added in the code (add them to array bots), 
+   * or manual games between players, or a cheat mode which is effectively a board that can be freely manipulated.
+   * Run program with parameter "manual" for a game with moves added in the command line, "cheat" to ignore all rules, and no parameters to run a tournament between agents listed in bots.
+   **/
   public static void main(String[] args){
     Agent[] bots = {new RandomAgent(), new RandomAgent(), new RandomAgent()};
     if(args.length > 0 && args[0].equals("manual")){
       bots = new Agent[] {new ManualAgent("A"), new ManualAgent("B"), new ManualAgent("C")};
       tournament(bots,60,0,true, null);
+    }
+    else if (args.length > 0 && args[0].equals("cheat")){
+      playCheat();
     }
     else tournament(bots,300,0,true,null);
   }

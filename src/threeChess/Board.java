@@ -24,6 +24,7 @@ public class Board implements Cloneable{
   /**A Map representing the remaining time allowed for each player, in milliseconds**/
   private HashMap<Colour,Integer> timeLeft;
 
+
   /**
    * Initialises the board, placing all pieces at their initial position.
    * Note, unlike two person chess, the Queen is always on the left, and the King is always on his own colour.
@@ -50,6 +51,9 @@ public class Board implements Cloneable{
       timeLeft.put(c,time);
     }
   }
+
+  
+
 
   /**
    * Return a set of all the positions of pieces belonging to a player.
