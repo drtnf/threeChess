@@ -162,7 +162,9 @@ public class ThreeChessDisplay extends JFrame {
    * @param g A graphics context for the Frame.
    * **/
   public void paint(Graphics g){
-    repaintCanvas();
+    if (canvas.getBufferStrategy() != null) {
+      repaintCanvas();
+    }
   }
 
   /** Repaints the board to the canvas. **/
