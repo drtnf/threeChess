@@ -248,7 +248,6 @@ public class ThreeChessDisplay extends JFrame {
     int drawY = metrics.getAscent() - metrics.getHeight() / 2;
     g.setColor(TEXT_COLOURS[colour.ordinal()]);
     g.drawString(text, drawX, drawY);
-    g.setFont(previousFont);
 
     // We add a * when it is the agent's turn.
     if (active) {
@@ -256,7 +255,7 @@ public class ThreeChessDisplay extends JFrame {
     }
 
     // We draw the pieces the agent has taken below their name.
-    g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, CAPTURED_FONTSIZE));
+    g.setFont(new Font(previousFont.getFontName(), Font.PLAIN, CAPTURED_FONTSIZE));
     metrics = g.getFontMetrics();
     int lineHeight = metrics.getHeight() * (colour == Colour.BLUE ? -1 : 1);
     int capturedY = drawY;
@@ -276,8 +275,9 @@ public class ThreeChessDisplay extends JFrame {
         }
     }
 
-    // Reset the rotation.
+    // Reset the rotation and font.
     g.setTransform(orig);
+    g.setFont(previousFont);
   }
 
   //calculates the coordinates of flanks for computing square coordinates.
