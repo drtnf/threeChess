@@ -43,7 +43,7 @@ The offical rules, and basic hints are available [here](https://www.threechess.c
 
     <dt>♟ Pawn</dt>
 
-    <dd>The Pawn may only move 1 square forward at a time, with the following exceptions: one its first move, it may move two squares forwards; to take a piece it _must_ move diagonally forwards; and if it reaches the back rank, it is automatically promoted to a Queen (unlike normal chess, where the player can choose which piece to promote to). There is en passant in this version of the game</dd>
+    <dd>The Pawn may only move 1 square forward at a time, with the following exceptions: one its first move, it may move two squares forwards; to take a piece it _must_ move diagonally forwards; and if it reaches the back rank, it is automatically promoted to a Queen (unlike normal chess, where the player can choose which piece to promote to). There is _no_ en passant in this version of the game</dd>
 
     </dl>
 
