@@ -5,7 +5,16 @@ import threeChess.Board;
 import threeChess.Position;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+/**
+ * Represents a state-action pair.
+ */
+class SAPair {
+  Board state;
+  Position[] action;
+  SAPair(Board s, Position[] a) {state = s; action = a;}
+}
 
 /**
  * A Q-Learning agent for ThreeChess.
@@ -19,6 +28,24 @@ import java.util.ArrayList;
 public class Agent22466497 extends Agent {
 
   private final String name = "Agent22466497";
+
+  // Q-Learning Parameters
+  Board previousState; int previousReward; Position[] previousAction;
+  Board currentState; int currentReward;
+  double γ; // Discount Factor
+
+  // Q-Learning Storage
+  HashMap<SAPair, Double> Qvalues; // The table of Q-values, i.e. the table of state-action pair utilities.
+  HashMap<SAPair, Integer> N_sa; // A 2D table, where <s, a>  keeps track of the number of times action a was performed while in state s.
+
+  // Constructor
+  public Agent22466497() {
+    previousState = null; previousReward = 0; previousAction = new Position[2];
+    currentState = null; currentReward = 0;
+    γ = 0.95;
+    Qvalues = new HashMap<>();
+    N_sa = new HashMap<>();
+  }
 
   /* Private Helper Methods */
 
@@ -42,6 +69,51 @@ public class Agent22466497 extends Agent {
       }
     }
     return valid_moves.toArray(new Position[0][0]);
+  }
+
+  /**
+   * The learning function, η. This function specifies a learning rate that decreases over time.
+   * @param numVisited the number of times that the current state-action pair has been visited.
+   * @return a learning parameter acting as a decreasing factor over time as the value of the input increases.
+   */
+  private double η(int numVisited) {
+    return (20.0 / (19.0 + numVisited));
+  }
+
+  /**
+   * Calculates the highest possible utility associated with the best action from the current state.
+   * @param state the current state.
+   * @return the maximum utility achieveable from this state.
+   */
+  private double max_Q(Board state) throws Error {
+    Position[][] moves = validMoves(state);
+    if (moves.length == 0) throw new Error("No moves reachable from the current board position.");
+    Position[] bestAction = new Position[2];
+    double bestUtility = Double.MIN_VALUE;
+    for (Position[] action : moves) {
+      SAPair currSA = new SAPair(state, action);
+      if (Qvalues.getOrDefault(currSA, 0.0) > bestUtility) {
+        bestAction = action;
+        bestUtility = Qvalues.getOrDefault(currSA, 0.0);
+      }
+    }
+    return bestUtility;
+  }
+
+  /**
+   * The Q-Learning storage update function. This function is called at the start of move to update utilities and visit counts
+   * for various state-action pairs. The implicit arguments to this function exist in the class. The default utility for
+   * state-action pairs that have not yet been visited is 0.
+   */
+  private void Q_Learning_Update() {
+    if (currentState.gameOver()) Qvalues.put(new SAPair(currentState, null), (double) currentReward);
+    if (!previousState.equals(null)) { // previousState is null if no states have been visited before
+      SAPair currSA = new SAPair(previousState, previousAction);
+      N_sa.put(currSA, N_sa.get(currSA).equals(null) ? 1 : N_sa.get(currSA) + 1);
+      double c = η(N_sa.get(currSA));
+      double currQ = Qvalues.getOrDefault(currSA, 0.0);
+      Qvalues.put(currSA, (1 - c) * currQ + c * (previousReward + γ * max_Q(currentState)));
+    }
   }
 
   /* Public Methods */
