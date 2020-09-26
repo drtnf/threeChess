@@ -29,16 +29,18 @@ public class Agent22466497 extends Agent {
    * @return a 2D array, where the second dimension is 2 elements long, indicating all the valid moves for the current player.
    */
   private Position[][] validMoves(Board board) {
+    // Find all of our piece positions and all of the board spaces
     Position[] pieces = board.getPositions(board.getTurn()).toArray(new Position[0]);
     Position[] spaces = Position.values();
     ArrayList<Position[]> valid_moves = new ArrayList<>();
     // Enumerate over all possible move spaces for all pieces
     for (Position piece : pieces) {
       for (Position space : spaces) {
-        if (board.isLegalMove(piece, space) && !valid_moves.contains(new Position[] {piece, space})) valid_moves.add(new Position[] {piece, space});
+        // Start Position -> End Position, Piece -> Space
+        Position[] currMove = new Position[] {piece, space};
+        if (board.isLegalMove(piece, space) && !valid_moves.contains(currMove)) valid_moves.add(currMove);
       }
     }
-
     return valid_moves.toArray(new Position[0][0]);
   }
 
