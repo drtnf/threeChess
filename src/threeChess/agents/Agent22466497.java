@@ -19,8 +19,7 @@ class SAPair {
 /**
  * A Q-Learning agent for ThreeChess.
  * To Do:
- * - Define a reward function for new states: reward(s, s').
- * - Write the Q-Learning agent model inner loop for the chooseMove function.
+ * 
  * 
  * Current Issues:
  * 
