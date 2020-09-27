@@ -19,7 +19,8 @@ class SAPair {
 /**
  * A Q-Learning agent for ThreeChess.
  * To Do:
- * 
+ * - Define a reward function for new states: reward(s, s').
+ * - Write the Q-Learning agent model inner loop for the chooseMove function.
  * 
  * Current Issues:
  * 
@@ -30,7 +31,7 @@ public class Agent22466497 extends Agent {
   private final String name = "Agent22466497";
 
   // Q-Learning Parameters
-  Board previousState; int previousReward; Position[] previousAction;
+  Board s; int r; Position[] a; // Previous state-action-reward "tuple"
   Board currentState; int currentReward;
   double γ; // Discount Factor
 
@@ -40,7 +41,7 @@ public class Agent22466497 extends Agent {
 
   // Constructor
   public Agent22466497() {
-    previousState = null; previousReward = 0; previousAction = new Position[2];
+    s = null; r = 0; a = new Position[2];
     currentState = null; currentReward = 0;
     γ = 0.95;
     Qvalues = new HashMap<>();
@@ -107,13 +108,51 @@ public class Agent22466497 extends Agent {
    */
   private void Q_Learning_Update() {
     if (currentState.gameOver()) Qvalues.put(new SAPair(currentState, null), (double) currentReward);
-    if (!previousState.equals(null)) { // previousState is null if no states have been visited before
-      SAPair currSA = new SAPair(previousState, previousAction);
-      N_sa.put(currSA, N_sa.get(currSA).equals(null) ? 1 : N_sa.get(currSA) + 1);
+    if (s != null) { // s is null if no states have been visited before
+      SAPair currSA = new SAPair(s, a);
+      N_sa.put(currSA, N_sa.get(currSA) == null ? 1 : N_sa.get(currSA) + 1);
       double c = η(N_sa.get(currSA));
       double currQ = Qvalues.getOrDefault(currSA, 0.0);
-      Qvalues.put(currSA, (1 - c) * currQ + c * (previousReward + γ * max_Q(currentState)));
+      Qvalues.put(currSA, (1 - c) * currQ + c * (r + γ * max_Q(currentState)));
     }
+  }
+
+  /**
+   * The f-function is responsible for artificially inflating the utility values
+   * of state-action pairs that have not yet been visited enough.
+   * The function encourages exploration of new state-action pairs.
+   * @param u the utility of a state-action pair.
+   * @param n the number of times that state-action pair has been visited.
+   * @return a possibly inflated utility value.
+   */
+  private double f(double u, int n) { return (n < 10 ? Double.MAX_VALUE : u); }
+
+  /**
+   * The board object tracks the number of moves (getMoveCount) and a list of all the moves so far (getMove).
+   * We can define a reward function for our agent's previous move (not just the last move, as that was not made by our agent).
+   * The reward function takes into account not just the state of the board directly after our agent has played,
+   * but also after the other 2 agents have played as well. Thus, the "previous" state is the state directly before the last move
+   * played by our agent.
+   * @param current
+   * @return
+   */
+  private int reward(Board current) {
+    int numMoves = current.getMoveCount();
+    if (numMoves <= 2) return 0; // Our agent hasn't moved yet.
+    // Reconstruct the board from the start to the last position
+    Board previous = new Board(500);
+    for (int i = 0; i < numMoves - 2; i++) { // The moves are indexed from 1
+      Position[] move = current.getMove(i);
+      try {
+        previous.move(move[0], move[1]);
+      } catch (Exception e) { System.out.println("Reached a block that should not be reached: " + e); } // We should NEVER end up here.
+    }
+    // Here we have 2 boards, previous and current.
+    // We generate the reward value for a board position.
+    int diffPieces = current.getPositions(current.getTurn()).size() - previous.getPositions(current.getTurn()).size();
+    int diffCaptures = current.getCaptured(current.getTurn()).size() - previous.getCaptured(current.getTurn()).size();
+
+    return (diffPieces + diffCaptures);
   }
 
   /* Public Methods */
@@ -127,8 +166,24 @@ public class Agent22466497 extends Agent {
    * and the second element is the position to move that piece to.
    */
   public Position[] playMove(Board board) {
-    // TODO Auto-generated method stub
-    return null;
+    currentState = board; currentReward = reward(board);
+    Q_Learning_Update();
+    if (board.gameOver()) return null;
+
+    // Get the best possible action with the highest f-utility
+    Position[] bestAction = new Position[2]; double bestUtility = Double.MIN_VALUE;
+    Position[][] actions = validMoves(board);
+    for (Position[] action : actions) {
+      SAPair currPair = new SAPair(board, action);
+      double currentUtility = f(Qvalues.getOrDefault(currPair, 0.0), N_sa.getOrDefault(currPair, 0));
+      if (currentUtility > bestUtility) {
+        bestUtility = currentUtility;
+        bestAction = action;
+      }
+    }
+    s = currentState; r = currentReward;
+    return bestAction;
+
   }
 
   public String toString() {return name;}
