@@ -4,13 +4,20 @@ import threeChess.Agent;
 import threeChess.Board;
 import threeChess.Position;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Represents a state-action pair.
  */
-class SAPair {
+class SAPair implements Serializable {
+  private static final long serialVersionUID = 7753905743550444452L;
   Board state;
   Position[] action;
   SAPair(Board s, Position[] a) {state = s; action = a;}
@@ -28,6 +35,8 @@ class SAPair {
 public class Agent22466497 extends Agent {
 
   private final String name = "Agent22466497";
+  private final String QPersistance = "QPersistance";
+  private final String NPersistance = "NPersistance";
 
   // Q-Learning Parameters
   Board s; int r; Position[] a; // Previous state-action-reward "tuple"
@@ -45,6 +54,22 @@ public class Agent22466497 extends Agent {
     γ = 0.95;
     Qvalues = new HashMap<>();
     N_sa = new HashMap<>();
+
+    // Load storage objects from file, if they exist
+    try {
+      FileInputStream q_in = new FileInputStream(QPersistance);
+      ObjectInputStream q_obj = new ObjectInputStream(q_in);
+      Qvalues = (HashMap<SAPair, Double>) q_obj.readObject();
+      q_obj.close(); q_in.close();
+
+      FileInputStream N_in = new FileInputStream(NPersistance);
+
+
+    } catch (Exception e) {
+      System.out.println(e);
+      System.out.println("Persistance files cannot be located. Beginning with empty storage...");
+    }
+
   }
 
   /* Private Helper Methods */
@@ -154,6 +179,31 @@ public class Agent22466497 extends Agent {
     return (diffPieces + diffCaptures);
   }
 
+  /**
+   * Writes the Q-storage objects to file.
+   * @return true on successful write, and false if otherwise.
+   */
+  private boolean writeStorage() {
+    boolean success = true;
+    try {
+      FileOutputStream q_out = new FileOutputStream(QPersistance);
+      ObjectOutputStream q_obj = new ObjectOutputStream(q_out);
+      q_obj.writeObject(Qvalues);
+      q_obj.close(); q_out.close();
+
+      FileOutputStream N_out = new FileOutputStream(NPersistance);
+      ObjectOutputStream N_obj = new ObjectOutputStream(N_out);
+      N_obj.writeObject(N_sa);
+      N_obj.close(); N_out.close();
+
+    } catch (Exception e) {
+      System.out.println(e);
+      success = false;
+    }
+
+    return success;
+  }
+
   /* Public Methods */
 
   /**
@@ -181,6 +231,7 @@ public class Agent22466497 extends Agent {
       }
     }
     s = currentState; r = currentReward;
+    writeStorage();
     return bestAction;
 
   }
