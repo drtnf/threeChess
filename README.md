@@ -61,7 +61,7 @@ Files are provided for your agents to use including:
 *   Board.java which gives a representation of the current state of the game
 *   ThreeChessDisplay.java which generates a JFrame displaying the board.
 *   ThreeChess which contains methods for running games and tournaments between different agents.
-*   Agent.java which is an abstract class that you must subclass and provide logic for the agent to play moves given a board position. To make running tournaments easier, your agent must be in the package threeChess.agents, it must have the name Agent########.java (where the ahshes are your student number), and it must have a 0 parameter constructror.
+*   Agent.java which is an abstract class that you must subclass and provide logic for the agent to play moves given a board position. To make running tournaments easier, your agent must be in the package threeChess.agents, it must have the name Agent########.java (where the hashes are your student number), and it must have a 0 parameter constructror.
 
 There are a range of other classes as well, but those are the important one. 
 
