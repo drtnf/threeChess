@@ -18,13 +18,16 @@ public class ThreeChessDisplay extends JFrame {
   private static final Color DARKBLUE = new Color(0,0,127);
   private static final Color BLUE = new Color(102,102,255);
   private static final Color LIGHTBLUE = new Color(204,204,255);
-  private static final Color[] TEXT_COLOURS = {DARKBLUE, DARKGREEN, DARKRED};
+  private static final Color[] DARKCOLOURS = {DARKBLUE, DARKGREEN, DARKRED};
+  private static final Color[] LIGHTCOLOURS = {LIGHTBLUE, LIGHTGREEN, LIGHTRED};
   private static final int LABELS_FONTSIZE = 16;
   private static final int AGENTS_FONTSIZE = 24;
   private static final int PIECE_FONTSIZE = 32;
   private static final int CAPTURED_FONTSIZE = 24;
   private static final int AGENT_NAME_MAX_LENGTH = 20;
   private static final int CAPTURED_PER_ROW = 11;
+  private static final int HISTORY_CYCLE_CORNER_SIZE = 100;
+  private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
   private final Square[] squares;
   private final String[] players;
   private final Canvas canvas;
@@ -33,6 +36,9 @@ public class ThreeChessDisplay extends JFrame {
   private static int[][][] flanks;
   private MoveFuture manualMoveFuture;
   private Position manualMoveFrom;
+  private int lastMouseX = -1;
+  private int lastMouseY = -1;
+  private int historyMoveIndex = -1;
 
   /** To represent each square of the board. **/
   private class Square{
@@ -170,15 +176,15 @@ public class ThreeChessDisplay extends JFrame {
     MouseAdapter mouseListener = new MouseAdapter() {
       @Override
       public void mouseMoved(MouseEvent e) {
-        onMouseMove(e);
+        onMouseMove(e.getX(), e.getY());
       }
       @Override
       public void mouseExited(MouseEvent e) {
-        onMouseMove(e);
+        onMouseMove(-1, -1);
       }
       @Override
       public void mouseReleased(MouseEvent e) {
-        onMouseClick(e);
+        onMouseClick(e.getX(), e.getY(), e.getButton());
         repaintCanvas();
       }
     };
@@ -202,9 +208,37 @@ public class ThreeChessDisplay extends JFrame {
     repaintCanvas();
   }
 
+  /** @return the state of the board before move {@param moveIndex}. **/
+  private Board getHistoryBoard(int moveIndex) {
+    CheatBoard historyBoard = new CheatBoard();
+    for (int index = 0; index < moveIndex; ++index) {
+      Position[] move = board.getMove(index);
+      try {
+        historyBoard.move(move[0], move[1]);
+      } catch (ImpossiblePositionException e) {}
+    }
+    return historyBoard;
+  }
+
+  /** @return whether a past move is currently being displayed. **/
+  public boolean displayingHistory() {
+    return historyMoveIndex >= 0;
+  }
+
+  /** @return whether the user is allowed to display the history. **/
+  public boolean canDisplayHistory() {
+    return board.getMoveCount() > 0 && (board.gameOver() || waitingForManualMove());
+  }
+
+  /** @return the board that should currently be rendered. **/
+  private Board getRenderedBoard() {
+    return displayingHistory() ? getHistoryBoard(historyMoveIndex) : board;
+  }
+
   /** Puts the display into a state where it expects a move to be made. **/
   public MoveFuture askForMove() {
     manualMoveFuture = new MoveFuture();
+    onMouseMove(lastMouseX, lastMouseY); // Updates the cursor.
     repaintCanvas();
     return manualMoveFuture;
   }
@@ -224,8 +258,23 @@ public class ThreeChessDisplay extends JFrame {
   }
 
   /** Called when the user moves their mouse. **/
-  public void onMouseMove(MouseEvent e) {
-    Square square = getSquare(e.getX(), e.getY());
+  public void onMouseMove(int x, int y) {
+    // If the user hovers over the history cycle corners change the cursor to a hand.
+    if (y <= HISTORY_CYCLE_CORNER_SIZE && (x <= HISTORY_CYCLE_CORNER_SIZE || x >= size - HISTORY_CYCLE_CORNER_SIZE)) {
+      if (displayingHistory() || canDisplayHistory()) {
+        canvas.setCursor(HAND_CURSOR);
+      } else {
+        canvas.setCursor(Cursor.getDefaultCursor());
+      }
+      return;
+    }
+    // If we're otherwise displaying history, nothing past this point can be interacted with.
+    if (displayingHistory()) {
+      canvas.setCursor(Cursor.getDefaultCursor());
+      return;
+    }
+
+    Square square = getSquare(x, y);
     // Set the mouse cursor to a hand if it would be a valid click.
     if (manualMoveFuture == null
         || square == null
@@ -236,19 +285,36 @@ public class ThreeChessDisplay extends JFrame {
 
       canvas.setCursor(Cursor.getDefaultCursor());
     } else {
-      canvas.setCursor(new Cursor(Cursor.HAND_CURSOR));
+      canvas.setCursor(HAND_CURSOR);
     }
   }
 
   /** Called when the user clicks somewhere on the canvas. **/
-  public void onMouseClick(MouseEvent e) {
+  public void onMouseClick(int x, int y, int button) {
+    // If the user clicks in the top left or right, cycle through past moves.
+    if (y <= HISTORY_CYCLE_CORNER_SIZE && (x <= HISTORY_CYCLE_CORNER_SIZE || x >= size - HISTORY_CYCLE_CORNER_SIZE)) {
+      if (displayingHistory() || canDisplayHistory()) {
+        int count = board.getMoveCount();
+        int direction = (x <= HISTORY_CYCLE_CORNER_SIZE ? -1 : 1);
+        if ((direction == 1 && historyMoveIndex == count - 1) || (direction == -1 && historyMoveIndex == 0)) {
+          historyMoveIndex = -1;
+        } else if (historyMoveIndex == -1) {
+          historyMoveIndex = (direction == 1 ? 0 : count - 1);
+        } else {
+          historyMoveIndex = historyMoveIndex + direction;
+        }
+      } else {
+        historyMoveIndex = -1;
+      }
+      return;
+    }
     // If we're not expecting the user to make a move, ignore clicks.
-    if (manualMoveFuture == null)
+    if (displayingHistory() || manualMoveFuture == null)
       return;
 
-    Square square = getSquare(e.getX(), e.getY());
+    Square square = getSquare(x, y);
     // If the user didn't click within a square, or clicked within an empty square, clear the current move.
-    if (square == null || manualMoveFrom == square.pos || e.getButton() != MouseEvent.BUTTON1) {
+    if (square == null || manualMoveFrom == square.pos || button != MouseEvent.BUTTON1) {
       manualMoveFrom = null;
       return;
     }
@@ -294,7 +360,7 @@ public class ThreeChessDisplay extends JFrame {
   public void repaintCanvas(){
     Graphics2D g = getCanvasGraphics();
     try {
-      drawToCanvas(g);
+      drawToCanvas(g, getRenderedBoard());
     }
     finally {
       g.dispose();
@@ -302,7 +368,7 @@ public class ThreeChessDisplay extends JFrame {
     canvas.getBufferStrategy().show();
   }
 
-  public void drawToCanvas(Graphics2D g) {
+  public void drawToCanvas(Graphics2D g, Board board) {
     g.setColor(Color.LIGHT_GRAY);
     g.fillRect(0, 0, getWidth(), getHeight());
     g.setStroke(new BasicStroke(3));
@@ -331,20 +397,64 @@ public class ThreeChessDisplay extends JFrame {
       g.drawString(""+(i+1),(36-i)*h_unit/2,(23-2*i)*v_unit/4);
     }
 
-    drawAgentLabel(g, getWidth() / 2.0, 1.25*v_unit, 0, Colour.BLUE);
-    drawAgentLabel(g, 17*h_unit, 8.5*v_unit, -Math.PI/3, Colour.GREEN);
-    drawAgentLabel(g, 3*h_unit, 8.5*v_unit, Math.PI/3, Colour.RED);
+    drawAgentLabel(g, board, getWidth() / 2.0, 1.25*v_unit, 0, Colour.BLUE);
+    drawAgentLabel(g, board, 17*h_unit, 8.5*v_unit, -Math.PI/3, Colour.GREEN);
+    drawAgentLabel(g, board, 3*h_unit, 8.5*v_unit, Math.PI/3, Colour.RED);
 
     g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, PIECE_FONTSIZE));
     for(Position pos: Position.values())squares[pos.ordinal()].setPiece(board.getPiece(pos));
     for(Square sq: squares) sq.draw(g);
+
+    // If we're displaying the history, we want to draw the move as well.
+    if (displayingHistory()) {
+      Position[] move = this.board.getMove(historyMoveIndex);
+      Square from = squares[move[0].ordinal()];
+      Square to = squares[move[1].ordinal()];
+      g.setColor(LIGHTCOLOURS[from.piece.getColour().ordinal()]);
+      drawArrow(g, from, to, 6);
+      g.setColor(DARKCOLOURS[from.piece.getColour().ordinal()]);
+      drawArrow(g, from, to, 4);
+    }
+
+    // Draw the history back and forwards button.
+    if (displayingHistory() || canDisplayHistory()) {
+      g.setColor(Color.DARK_GRAY);
+      int x = size - HISTORY_CYCLE_CORNER_SIZE;
+      int unit = HISTORY_CYCLE_CORNER_SIZE / 4;
+      drawArrow(g, new int[] {2*unit, 2*unit, unit}, new int[] {5*unit/3, unit, unit}, 2); // Back button.
+      drawArrow(g, new int[] {x+unit, x+unit, x+2*unit}, new int[] {5*unit/3, unit, unit}, 2); // Forward button.
+    }
   }
 
-  private void drawAgentLabel(Graphics2D g, double x, double y, double angleRads, Colour colour) {
+  private static void drawArrow(Graphics2D g, Square from, Square to, int strokeWidth) {
+    int fromX = from.centre[0], fromY = from.centre[1];
+    int toX = to.centre[0], toY = to.centre[1];
+    double angle = Math.atan2(toY - fromY, toX - fromX);
+    fromX += (int) (10*Math.cos(angle)); toX -= (int) (10*Math.cos(angle));
+    fromY += (int) (10*Math.sin(angle)); toY -= (int) (10*Math.sin(angle));
+    drawArrow(g, new int[] {fromX, toX}, new int[] {fromY, toY}, strokeWidth);
+  }
+
+  private static void drawArrow(Graphics2D g, int[] xs, int[] ys, int strokeWidth) {
+    int fromX = xs[xs.length - 2], fromY = ys[ys.length - 2];
+    int toX = xs[xs.length - 1], toY = ys[ys.length - 1];
+    double angle = Math.atan2(toY - fromY, toX - fromX);
+    g.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f));
+    for (int i=0; i < xs.length - 1; ++i) {
+      g.drawLine(xs[i], ys[i], xs[i+1], ys[i+1]);
+    }
+    g.drawLine(toX, toY, (int) (toX - 15*Math.cos(angle - Math.PI/6)), (int) (toY - 15*Math.sin(angle - Math.PI/6)));
+    g.drawLine(toX, toY, (int) (toX - 15*Math.cos(angle + Math.PI/6)), (int) (toY - 15*Math.sin(angle + Math.PI/6)));
+  }
+
+  private void drawAgentLabel(Graphics2D g, Board board, double x, double y, double angleRads, Colour colour) {
     // Get the information we want to display about the agent.
     boolean winner = (board.getWinner() == colour);
     boolean active = (!board.gameOver() && board.getTurn() == colour);
-    String text = players[colour.ordinal()] + ": " + (board.getTimeLeft(colour) / 1000);
+    String text = players[colour.ordinal()];
+    if (!displayingHistory()) {
+      text += ": " + (board.getTimeLeft(colour) / 1000);
+    }
     StringBuilder takenString = new StringBuilder();
     List<Piece> captured = board.getCaptured(colour);
     for (Piece piece : captured) {
@@ -363,7 +473,7 @@ public class ThreeChessDisplay extends JFrame {
     int width = metrics.stringWidth(text);
     int drawX = -width / 2;
     int drawY = metrics.getAscent() - metrics.getHeight() / 2;
-    g.setColor(TEXT_COLOURS[colour.ordinal()]);
+    g.setColor(DARKCOLOURS[colour.ordinal()]);
     g.drawString(text, drawX, drawY);
 
     // We add a * when it is the agent's turn.
@@ -386,7 +496,7 @@ public class ThreeChessDisplay extends JFrame {
         for (int i=0; i < line.length(); ++i) {
             Piece piece = captured.get(row * CAPTURED_PER_ROW + i);
             String pieceStr = Character.toString(piece.getType().getChar());
-            g.setColor(TEXT_COLOURS[piece.getColour().ordinal()]);
+            g.setColor(DARKCOLOURS[piece.getColour().ordinal()]);
             g.drawString(pieceStr, capturedX, capturedY);
             capturedX += metrics.stringWidth(pieceStr);
         }

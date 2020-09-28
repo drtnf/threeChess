@@ -1,7 +1,5 @@
 package threeChess;
 
-import java.util.*;
-
 /**
  * Main class for representing game state.
  * The board maps each position to the piece at that posiiton, 
