@@ -10,20 +10,39 @@ import threeChess.*;
  * expressed as a pair of positions.
  * **/ 
 public class ManualAgent extends Agent{
-  
-  private String name = "Manual Agent";
-
 
   /**
-   * A no argument constructor, 
-   * required for tournament management.
-   * **/
-  public ManualAgent(){
+   * If true, manual input will be taken through interfacing with the display.
+   * If false, manual input will be taken through the console.
+   */
+  private final boolean useDisplayInput;
+  private final String name;
+
+  /** A no argument constructor, required for tournament management. **/
+  public ManualAgent() {
+    this("Manual Agent", true);
   }
 
-  public ManualAgent(String name){
+  public ManualAgent(String name) {
+    this(name, true);
+  }
+
+  public ManualAgent(String name, boolean useDisplayInput) {
     this.name = name;
-    System.out.println(name+" is a manually controlled agent.\n To make a move enter the satring position followed by a spec and then the end position of your move.\n For example,\nBD2 BD4\n will specify the blue pawn in front of the queen should move 2 squares forward.");
+    this.useDisplayInput = useDisplayInput;
+    if (useDisplayInput) {
+      System.out.println(
+          name + " is a manually controlled agent.\n"
+          + " To make a move click the piece you want to move in the display, "
+          + "and then click the square where you wish to move it to."
+      );
+    } else {
+      System.out.println(
+          name + " is a manually controlled agent.\n"
+          + " To make a move enter the starting position followed by a space and then the end position of your move.\n"
+          + " For example,\nBD2 BD4\n will specify the blue pawn in front of the queen should move 2 squares forward."
+      );
+    }
   }
 
   /**
@@ -38,6 +57,11 @@ public class ManualAgent extends Agent{
    * position to move that piece to.
    * **/
   public Position[] playMove(Board board){
+    return useDisplayInput ? getMoveFromDisplay(board) : getMoveFromScanner(board);
+  }
+
+  /** Asks the user to enter the move through the console. **/
+  private Position[] getMoveFromScanner(Board board) {
     System.out.println(board.getTurn()+"'s move:");
     Scanner sc = new Scanner(System.in);
     while(true){
@@ -52,7 +76,16 @@ public class ManualAgent extends Agent{
       catch(IllegalArgumentException e){
         System.out.println("Invalid move format. Use style \"BA1 RA1\".");
       }
-    } 
+    }
+  }
+
+  /** Asks the user to make a move by selecting a piece on the board and selecting where to move it. **/
+  private Position[] getMoveFromDisplay(Board board) {
+    try {
+      return board.getDisplay().askForMove().get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Exception waiting for user to enter move on display", e);
+    }
   }
 
   /**
@@ -67,7 +100,4 @@ public class ManualAgent extends Agent{
    * @param finalBoard the end position of the board
    * **/
   public void finalBoard(Board finalBoard){}
-
 }
-
-

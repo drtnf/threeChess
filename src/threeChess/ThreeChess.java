@@ -145,7 +145,9 @@ public class ThreeChess{
       long startTime = System.nanoTime();
       Position[] move = null;
       try{
-        move = current.playMove((Board)board.clone());
+        Board agentBoard = (Board) board.clone();
+        agentBoard.setDisplay(display);
+        move = current.playMove(agentBoard);
       }catch(CloneNotSupportedException e){}
       //How to deal with infinite loops here?
       //make agents runnable abstract classes and provide a final method for running a move?
@@ -212,10 +214,11 @@ public class ThreeChess{
     Agent agent = new ManualAgent();
     ThreeChessDisplay display = new ThreeChessDisplay(board, "Blue", "Green", "Red");
     while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
-      Colour colour = board.getTurn();
       Position[] move = null;
       try{
-        move = agent.playMove((Board)board.clone());
+        Board agentBoard = (Board) board.clone();
+        agentBoard.setDisplay(display);
+        move = agent.playMove(agentBoard);
       }catch(CloneNotSupportedException e){}
       if(move!=null && move.length==2){
         try{

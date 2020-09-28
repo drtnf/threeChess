@@ -26,4 +26,9 @@ public class CheatBoard extends Board implements Cloneable{
   public boolean isLegalMove(Position start, Position end){
     return true;
   }
+
+  /** All moves are legal so pointless to display. **/
+  public boolean displayLegalMoves() {
+    return false;
+  }
 }

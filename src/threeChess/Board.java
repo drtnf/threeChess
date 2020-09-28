@@ -24,6 +24,8 @@ public class Board implements Cloneable{
   /**A Map representing the remaining time allowed for each player, in milliseconds**/
   private HashMap<Colour,Integer> timeLeft;
 
+  /** If the board is being shown on a display, that display. **/
+  private ThreeChessDisplay display;
 
   /**
    * Initialises the board, placing all pieces at their initial position.
@@ -52,8 +54,20 @@ public class Board implements Cloneable{
     }
   }
 
-  
+  /** Sets the display that this board is currently being shown on. **/
+  public void setDisplay(ThreeChessDisplay display) {
+    this.display = display;
+  }
 
+  /** @return the display the board is currently being displayed on, or else null. **/
+  public ThreeChessDisplay getDisplay() {
+    return display;
+  }
+
+  /** @return whether in manual mode, the legal moves should be displayed on the board. **/
+  public boolean displayLegalMoves() {
+    return true;
+  }
 
   /**
    * Return a set of all the positions of pieces belonging to a player.
@@ -71,9 +85,7 @@ public class Board implements Cloneable{
     return positions;
   }
 
-  /**
-   * @return a set of all the pieces captured by {@param player}.
-   */
+  /** @return a set of all the pieces captured by {@param player}. **/
   public List<Piece> getCaptured(Colour player) {
     return new ArrayList<>(captured.get(player));
   }
@@ -222,7 +234,6 @@ public class Board implements Cloneable{
     }
     return false;//move did not match any legal option.
   }
-
 
   /**
    * Executes a legal move. 
@@ -404,7 +415,3 @@ public class Board implements Cloneable{
     return clone;
   }
 }
-
-
-
-
