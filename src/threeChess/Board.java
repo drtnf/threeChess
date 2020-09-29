@@ -184,7 +184,8 @@ public class Board implements Cloneable, Serializable {
               Piece castle = board.get(Position.get(mCol,0,7));
               Piece empty1 = board.get(Position.get(mCol,0,5));
               Piece empty2 = board.get(Position.get(mCol,0,6));
-              if(castle.getType()==PieceType.ROOK && castle.getColour()==mover.getColour() && empty1==null && empty2==null)
+              if(castle!=null && castle.getType()==PieceType.ROOK && castle.getColour()==mover.getColour()
+                  && empty1==null && empty2==null)
                 return true;
             }
             if(end==Position.get(mCol,0,2)){
@@ -192,7 +193,8 @@ public class Board implements Cloneable, Serializable {
               Piece empty1 = board.get(Position.get(mCol,0,1));
               Piece empty2 = board.get(Position.get(mCol,0,2));
               Piece empty3 = board.get(Position.get(mCol,0,3));
-              if(castle.getType()==PieceType.ROOK && castle.getColour()==mover.getColour() && empty1==null && empty2==null && empty3==null)
+              if(castle!=null && castle.getType()==PieceType.ROOK && castle.getColour()==mover.getColour()
+                  && empty1==null && empty2==null && empty3==null)
                 return true;
             }
           }
