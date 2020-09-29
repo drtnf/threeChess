@@ -26,6 +26,11 @@ public class ManualAgent extends Agent{
     System.out.println(name+" is a manually controlled agent.\n To make a move enter the satring position followed by a spec and then the end position of your move.\n For example,\nBD2 BD4\n will specify the blue pawn in front of the queen should move 2 squares forward.");
   }
 
+  @Override
+  public boolean isAutonomous() {
+    return false;
+  }
+
   /**
    * Play a move in the game. 
    * The agent is given a Board Object representing the position of all pieces, 

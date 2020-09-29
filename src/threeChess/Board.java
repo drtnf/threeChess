@@ -27,7 +27,6 @@ public class Board implements Cloneable, Serializable {
   /**A Map representing the remaining time allowed for each player, in milliseconds**/
   private HashMap<Colour,Integer> timeLeft;
 
-
   /**
    * Initialises the board, placing all pieces at their initial position.
    * Note, unlike two person chess, the Queen is always on the left, and the King is always on his own colour.
@@ -55,8 +54,10 @@ public class Board implements Cloneable, Serializable {
     }
   }
 
-  
-
+  /** @return whether in manual mode, the legal moves should be displayed on the board. **/
+  public boolean displayLegalMoves() {
+    return true;
+  }
 
   /**
    * Return a set of all the positions of pieces belonging to a player.
@@ -74,9 +75,7 @@ public class Board implements Cloneable, Serializable {
     return positions;
   }
 
-  /**
-   * @return a set of all the pieces captured by {@param player}.
-   */
+  /** @return a set of all the pieces captured by {@param player}. **/
   public List<Piece> getCaptured(Colour player) {
     return new ArrayList<>(captured.get(player));
   }
@@ -225,7 +224,6 @@ public class Board implements Cloneable, Serializable {
     }
     return false;//move did not match any legal option.
   }
-
 
   /**
    * Executes a legal move. 

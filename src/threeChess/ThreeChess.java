@@ -1,10 +1,9 @@
 package threeChess;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.*;
+
 import threeChess.agents.*;
-import java.util.Arrays;
-import java.util.Random;
 
 /**
  * Class with static methods for running tournaments and playing threeChess matches.
@@ -137,15 +136,17 @@ public class ThreeChess{
     logger.println("GREEN: "+green.toString());
     logger.println("RED: "+red.toString());
     ThreeChessDisplay display = null;
-    if(displayOn) 
+    if(displayOn) {
       display = new ThreeChessDisplay(board, blue.toString(), green.toString(), red.toString());
+      GUIAgent.currentDisplay = display;
+    }
     while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
       Colour colour = board.getTurn();
       Agent current = (colour==Colour.BLUE?blue:(colour==Colour.GREEN?green:red));
       long startTime = System.nanoTime();
       Position[] move = null;
       try{
-        move = current.playMove((Board)board.clone());
+        move = current.playMove((Board) board.clone());
       }catch(CloneNotSupportedException e){}
       //How to deal with infinite loops here?
       //make agents runnable abstract classes and provide a final method for running a move?
@@ -158,10 +159,12 @@ public class ThreeChess{
           board.move(move[0],move[1],(timed?(int)time:0));
           logger.println(colour + ": " + move[0] + '-' + move[1] + " t:" + time);
           if(displayOn){
-            try{Thread.sleep(pause);}
-            catch(InterruptedException e){} 
+            // There's no point in sleeping if we have to wait for the user to input their move anyway.
+            if (current.isAutonomous()) {
+              try{Thread.sleep(pause);}
+              catch(InterruptedException e){}
+            }
             display.repaintCanvas();
-            //display.repaint();
           }
         }
         catch(ImpossiblePositionException e){logger.println(e.getMessage());}
@@ -172,6 +175,7 @@ public class ThreeChess{
         return ret;
       }
     }
+    GUIAgent.currentDisplay = null;
     logger.println("=====Game Over=====");
     int[] ret = {0,0,0};
     ret[board.getWinner().ordinal()] = 1;
@@ -204,7 +208,7 @@ public class ThreeChess{
 
 
   /** 
-   * This plays amanual game where all rules are ignored.
+   * This plays a manual game where all rules are ignored.
    * This effectively allows you to move pieces around the board for simulating positions.
    * **/
   public static void playCheat(){
@@ -212,10 +216,9 @@ public class ThreeChess{
     Agent agent = new ManualAgent();
     ThreeChessDisplay display = new ThreeChessDisplay(board, "Blue", "Green", "Red");
     while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
-      Colour colour = board.getTurn();
       Position[] move = null;
       try{
-        move = agent.playMove((Board)board.clone());
+        move = agent.playMove((Board) board.clone());
       }catch(CloneNotSupportedException e){}
       if(move!=null && move.length==2){
         try{
@@ -237,6 +240,10 @@ public class ThreeChess{
     Agent[] bots = {new RandomAgent(), new RandomAgent(), new RandomAgent()};
     if(args.length > 0 && args[0].equals("manual")){
       bots = new Agent[] {new ManualAgent("A"), new ManualAgent("B"), new ManualAgent("C")};
+      tournament(bots,60,0,true, null);
+    }
+    else if(args.length > 0 && args[0].equals("gui")){
+      bots = new Agent[] {new GUIAgent("A"), new GUIAgent("B"), new GUIAgent("C")};
       tournament(bots,60,0,true, null);
     }
     else if (args.length > 0 && args[0].equals("cheat")){
