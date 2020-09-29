@@ -24,9 +24,6 @@ public class Board implements Cloneable{
   /**A Map representing the remaining time allowed for each player, in milliseconds**/
   private HashMap<Colour,Integer> timeLeft;
 
-  /** If the board is being shown on a display, that display. **/
-  private ThreeChessDisplay display;
-
   /**
    * Initialises the board, placing all pieces at their initial position.
    * Note, unlike two person chess, the Queen is always on the left, and the King is always on his own colour.
@@ -52,16 +49,6 @@ public class Board implements Cloneable{
       captured.put(c,new ArrayList<>());
       timeLeft.put(c,time);
     }
-  }
-
-  /** Sets the display that this board is currently being shown on. **/
-  public void setDisplay(ThreeChessDisplay display) {
-    this.display = display;
-  }
-
-  /** @return the display the board is currently being displayed on, or else null. **/
-  public ThreeChessDisplay getDisplay() {
-    return display;
   }
 
   /** @return whether in manual mode, the legal moves should be displayed on the board. **/
