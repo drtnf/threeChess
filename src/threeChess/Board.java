@@ -1,5 +1,6 @@
 package threeChess;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -9,9 +10,11 @@ import java.util.*;
  * as well as whose move it is, and which pieces have been 
  * captured by which player.
  * **/
-public class Board implements Cloneable{
-
-  /**A map from board positions to the pieces at that position**/
+public class Board implements Cloneable, Serializable {
+  
+  /** Serial version UID for Board serialization and storage**/
+  private static final long serialVersionUID = -8547775276050612530L;
+  /** A map from board positions to the pieces at that position **/
   private HashMap<Position,Piece> board;
   /**A flag that is true if and only if a King has been captured**/
   private boolean gameOver = false;
@@ -404,7 +407,3 @@ public class Board implements Cloneable{
     return clone;
   }
 }
-
-
-
-

@@ -1,13 +1,16 @@
 package threeChess;
 
+import java.io.Serializable;
+
 /**
  * A specific piece on the board. 
  * Each piece has a Colour and a Type,
  * and is immutable. 
  * Not an enum so we can have identical, but non-equal pieces, such as pawns. 
  * **/
-public class Piece{
-  private final PieceType type;//the piece's type
+public class Piece implements Serializable {
+  private static final long serialVersionUID = 8757415399259946465L; // Serial version UID for serialization and storage
+  private final PieceType type;// the piece's type
   private final Colour colour;//the pieces colour
 
   /**
