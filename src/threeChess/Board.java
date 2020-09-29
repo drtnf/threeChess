@@ -118,7 +118,7 @@ public class Board implements Cloneable, Serializable {
       current = next;
     }
     return current;
-  } 
+  }
 
   /**
    * Checks if a move is legal. 
