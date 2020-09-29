@@ -10,8 +10,8 @@ import threeChess.ThreeChessDisplay;
  */
 public class GUIAgent extends Agent {
 
+  public static ThreeChessDisplay currentDisplay = null;
   private final String name;
-  private ThreeChessDisplay currentDisplay;
 
   /** A no argument constructor, required for tournament management. **/
   public GUIAgent() {
@@ -27,9 +27,9 @@ public class GUIAgent extends Agent {
     );
   }
 
-  /** Sets the display that the GUI agent should use as the interface for its moves. **/
-  public void setCurrentDisplay(ThreeChessDisplay display) {
-    currentDisplay = display;
+  @Override
+  public boolean isAutonomous() {
+    return false;
   }
 
   /** Gets and returns a move from the display for this agent. **/

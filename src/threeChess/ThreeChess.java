@@ -129,10 +129,6 @@ public class ThreeChess{
    * @return an array of three ints, the scores for blue, green and red, in that order.
    * **/
   public static int[] play(Agent blue, Agent green, Agent red, int timeLimit, PrintStream logger, boolean displayOn){
-    List<GUIAgent> guiAgents = new ArrayList<>();
-    for (Agent agent : new Agent[] {blue, green, red}) {
-      if (agent instanceof GUIAgent) guiAgents.add((GUIAgent) agent);
-    }
     Board board = new Board(timeLimit>0?timeLimit*1000:1);
     boolean timed = timeLimit>0;
     logger.println("======NEW GAME======");
@@ -142,10 +138,7 @@ public class ThreeChess{
     ThreeChessDisplay display = null;
     if(displayOn) {
       display = new ThreeChessDisplay(board, blue.toString(), green.toString(), red.toString());
-      for (GUIAgent agent : guiAgents)
-        agent.setCurrentDisplay(display);
-    } else if (!guiAgents.isEmpty()) {
-      throw new IllegalArgumentException("GUIAgents are unsupported when displayOn is false");
+      GUIAgent.currentDisplay = display;
     }
     while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
       Colour colour = board.getTurn();
@@ -166,7 +159,8 @@ public class ThreeChess{
           board.move(move[0],move[1],(timed?(int)time:0));
           logger.println(colour + ": " + move[0] + '-' + move[1] + " t:" + time);
           if(displayOn){
-            if (!(current instanceof GUIAgent)) {
+            // There's no point in sleeping if we have to wait for the user to input their move anyway.
+            if (current.isAutonomous()) {
               try{Thread.sleep(pause);}
               catch(InterruptedException e){}
             }
@@ -181,8 +175,7 @@ public class ThreeChess{
         return ret;
       }
     }
-    for (GUIAgent agent : guiAgents)
-      agent.setCurrentDisplay(null);
+    GUIAgent.currentDisplay = null;
     logger.println("=====Game Over=====");
     int[] ret = {0,0,0};
     ret[board.getWinner().ordinal()] = 1;

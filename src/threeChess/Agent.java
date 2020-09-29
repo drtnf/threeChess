@@ -22,6 +22,11 @@ public abstract class Agent implements Runnable{
    * **/
   public Agent(){}
 
+  /** Can be overridden to mark an Agent as requiring manual input for moves. **/
+  public boolean isAutonomous() {
+      return true;
+  }
+
   /**
    * Play a move in the game. 
    * The agent is given a Board Object representing the position of all pieces, 
