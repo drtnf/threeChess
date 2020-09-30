@@ -121,6 +121,38 @@ public class Board implements Cloneable, Serializable {
   }
 
   /**
+   * Performs one step of a move such as the L shaped move of a knight, or a diagonal step of a Bishop.
+   * Rooks, Bishops and Queens may iterate one step repeatedly, but all other pieces can only move one step per move.
+   * Note the colour of the piece is relevant as moving forward past the 4th row is actually moving backwards relative to the board.
+   * It does not check whether the move is legal or possible.
+   * Overloaded operation with an extra parameter to allow for checking if an iterated move needs to be reversed. 
+   * @param piece the piece being moved
+   * @param step an array of the direction sequence in the step
+   * @param current the starting position of the step.
+   * @param reverse whether the steps out to be reversed (if the piece crosses board section).
+   * @return the position at the end of the step.
+   * @throws ImpossiblePositionException if the step takes piece off the board.
+   * **/
+  public Position step(Piece piece, Direction[] step, Position current, boolean reverse) throws ImpossiblePositionException{
+    for(Direction d: step){
+      if((piece.getColour()!=current.getColour() && piece.getType() == PieceType.PAWN) || reverse){//reverse directions for knights
+        switch(d){
+          case FORWARD: d = Direction.BACKWARD; break;
+          case BACKWARD: d = Direction.FORWARD; break;
+          case LEFT: d = Direction.RIGHT; break;
+          case RIGHT: d = Direction.LEFT; break;
+        }
+      }
+      Position next = current.neighbour(d);
+      if(next.getColour()!= current.getColour()){//need to reverse directions when switching between sections of the board
+        reverse=true;
+      }
+      current = next;
+    }
+    return current;
+  }
+  
+  /**
    * Checks if a move is legal. 
    * The move is specified by the start position (where the moving piece begins),
    * and the end position, where the piece intends to move to.
@@ -206,18 +238,7 @@ public class Board implements Cloneable, Serializable {
           try{
             Position tmp = step(mover,step,start);
             while(end != tmp && board.get(tmp)==null){
-              if(tmp.getColour()!=start.getColour()){//flip steps when moving between board sections.
-                step = new Direction[steps[i].length];
-                for(int j = 0; j<steps[i].length; j++){
-                  switch(steps[i][j]){
-                    case FORWARD: step[j] = Direction.BACKWARD; break;
-                    case BACKWARD: step[j] = Direction.FORWARD; break;
-                    case LEFT: step[j] = Direction.RIGHT; break;
-                    case RIGHT: step[j] = Direction.LEFT; break;
-                  }
-                }
-              }
-              tmp = step(mover, step,tmp);
+              tmp = step(mover, step, tmp, tmp.getColour()!=start.getColour());
             }
             if(end==tmp) return true;
           }catch(ImpossiblePositionException e){}//do nothing, steps went off board.
