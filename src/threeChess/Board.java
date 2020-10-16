@@ -412,6 +412,17 @@ public class Board implements Cloneable, Serializable {
     return timeLeft.get(colour);
   }
 
+  /** @return whether a player timed out. **/
+  public boolean isTimedOut() {
+    if (!gameOver)
+      return false;
+    for(Colour colour : Colour.values()){
+      if(timeLeft.get(colour) < 0)
+        return true;
+    }
+    return false;
+  }
+
   /**
    * Returns a deep clone of the board state, 
    * such that no operations will affect the original board instance.

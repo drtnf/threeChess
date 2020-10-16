@@ -10,7 +10,7 @@ package threeChess;
  * Agent########.java, where the hashes correspond to the authors student number;
  * and each Agent must have a zero parameter constructor (but overloaded constructors are allowed). 
  * **/ 
-public abstract class Agent implements Runnable{
+public abstract class Agent implements Runnable, Cloneable {
 
   private Board brd;
   private Position[] mv;
@@ -25,6 +25,11 @@ public abstract class Agent implements Runnable{
   /** Can be overridden to mark an Agent as requiring manual input for moves. **/
   public boolean isAutonomous() {
       return true;
+  }
+
+  /** @return a copy of this agent so that it can be run in another thread. **/
+  public Agent clone() {
+    throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support cloning");
   }
 
   /**

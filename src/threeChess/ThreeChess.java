@@ -129,60 +129,10 @@ public class ThreeChess{
    * @return an array of three ints, the scores for blue, green and red, in that order.
    * **/
   public static int[] play(Agent blue, Agent green, Agent red, int timeLimit, PrintStream logger, boolean displayOn){
-    Board board = new Board(timeLimit>0?timeLimit*1000:1);
-    boolean timed = timeLimit>0;
-    logger.println("======NEW GAME======");
-    logger.println("BLUE: "+blue.toString());
-    logger.println("GREEN: "+green.toString());
-    logger.println("RED: "+red.toString());
-    ThreeChessDisplay display = null;
-    if(displayOn) {
-      display = new ThreeChessDisplay(board, blue.toString(), green.toString(), red.toString());
-      GUIAgent.currentDisplay = display;
-    }
-    while(!board.gameOver()){//note in an untimed game, this loop can run infinitely.
-      Colour colour = board.getTurn();
-      Agent current = (colour==Colour.BLUE?blue:(colour==Colour.GREEN?green:red));
-      long startTime = System.nanoTime();
-      Position[] move = null;
-      try{
-        move = current.playMove((Board) board.clone());
-      }catch(CloneNotSupportedException e){}
-      //How to deal with infinite loops here?
-      //make agents runnable abstract classes and provide a final method for running a move?
-      //set board as a variable
-      //run executes the move method
-      //setup a timeout?
-      long time = (System.nanoTime() - startTime + 500_000L) / 1_000_000L; // Rounds to nearest millisecond
-      if(move!=null && move.length==2 && board.isLegalMove(move[0],move[1])){
-        try{
-          board.move(move[0],move[1],(timed?(int)time:0));
-          logger.println(colour + ": " + move[0] + '-' + move[1] + " t:" + time);
-          if(displayOn){
-            // There's no point in sleeping if we have to wait for the user to input their move anyway.
-            if (current.isAutonomous()) {
-              try{Thread.sleep(pause);}
-              catch(InterruptedException e){}
-            }
-            display.repaintCanvas();
-          }
-        }
-        catch(ImpossiblePositionException e){logger.println(e.getMessage());}
-      }
-      else{//Illegal move results in immediate loss, -2 penalty, and a win awarded to the other two players.
-        int[] ret = {1,1,1};
-        ret[board.getTurn().ordinal()] = -2;
-        return ret;
-      }
-    }
-    GUIAgent.currentDisplay = null;
-    logger.println("=====Game Over=====");
-    int[] ret = {0,0,0};
-    ret[board.getWinner().ordinal()] = 1;
-    ret[board.getLoser().ordinal()] = -1;
-    for(Colour c:Colour.values())
-      logger.println(c+" score:"+ret[c.ordinal()]+" time:"+board.getTimeLeft(c)+" points:"+ ret[c.ordinal()]);
-    return ret;
+    Agent[] agents = {blue, green, red};
+    Game game = new Game(agents, timeLimit, 0, pause, logger, displayOn);
+    game.run();
+    return game.getAgentScores();
   }
 
   /**
@@ -248,6 +198,20 @@ public class ThreeChess{
     }
     else if (args.length > 0 && args[0].equals("cheat")){
       playCheat();
+    }
+    else if (args.length > 0 && args[0].equals("tournament")) {
+      bots = new Agent[] {new RandomAgent(), new RandomAgent(), new GreedyAgent(), new GreedyAgent()};
+      Tournament tournament = new Tournament(
+              bots, // agents
+              10_000, // numGames
+              10, // timeLimitSeconds
+              300, // maximumTurns
+              0, // pauseMS
+              Runtime.getRuntime().availableProcessors(), // threads
+              System.out, // logger
+              false
+      );
+      tournament.runTournament();
     }
     else tournament(bots,300,0,true,null);
   }

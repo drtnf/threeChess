@@ -20,7 +20,11 @@ public class RandomAgent extends Agent{
    * A no argument constructor, 
    * required for tournament management.
    * **/
-  public RandomAgent(){
+  public RandomAgent(){}
+
+  /** @return another equivalent random agent. **/
+  @Override public RandomAgent clone() {
+    return new RandomAgent();
   }
 
   /**
