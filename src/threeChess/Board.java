@@ -413,6 +413,14 @@ public class Board implements Cloneable, Serializable {
   }
 
   /**
+   * Return the map representing the current board state, wrapped to be unmodifiable
+   * @return The unmodifiable board state map
+   */
+  public Map<Position, Piece> getBoard() {
+    return Collections.unmodifiableMap(board);
+  }
+
+  /**
    * Returns a deep clone of the board state, 
    * such that no operations will affect the original board instance.
    * @return a deep clone of the board state.
