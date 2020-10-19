@@ -413,10 +413,15 @@ public class Board implements Cloneable, Serializable {
   }
 
   /**
-   * Return the map representing the current board state, wrapped to be unmodifiable
-   * @return The unmodifiable board state map
+   * Return the map representing the current board state, wrapped to be unmodifiable.
+   *
+   * IMPORTANT NOTE: While you can not modify the returned Map, changes to the board (such as move()),
+   * will be reflected in this returned map, so if you wish to keep this around for caching or something,
+   * you should create a copy of it by using: new HashMap<>(board.getPositionPieceMap)
+   *
+   * @return The unmodifiable (though not immutable, see Note) board position/piece state map
    */
-  public Map<Position, Piece> getBoard() {
+  public Map<Position, Piece> getPositionPieceMap() {
     return Collections.unmodifiableMap(board);
   }
 

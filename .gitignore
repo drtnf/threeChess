@@ -27,3 +27,9 @@ doc/
 
 #agent code
 src/threeChess/agents/
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/threeChess.iml
+/threeChess.iml
+/.idea/vcs.xml
