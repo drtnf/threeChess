@@ -413,6 +413,15 @@ public class Board implements Cloneable, Serializable {
   }
 
   /**
+   * Return a copy of map representing the current board state
+   *
+   * @return The copy of the board position/piece state map
+   */
+  public HashMap<Position, Piece> getPositionPieceMap() {
+    return new HashMap<>(board);
+  }
+
+  /**
    * Returns a deep clone of the board state, 
    * such that no operations will affect the original board instance.
    * @return a deep clone of the board state.
