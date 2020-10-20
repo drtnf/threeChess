@@ -200,7 +200,7 @@ public class ThreeChess{
       playCheat();
     }
     else if (args.length > 0 && args[0].equals("tournament")) {
-      bots = new Agent[] {new RandomAgent(), new RandomAgent(), new GreedyAgent(), new GreedyAgent()};
+      bots = new Agent[] {new RandomAgent(), new RandomAgent(), new RandomAgent(), new RandomAgent()};
       Tournament tournament = new Tournament(
               bots, // agents
               10_000, // numGames
